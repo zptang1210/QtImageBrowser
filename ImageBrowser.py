@@ -18,6 +18,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.imageViewerSubWindows = {}
         self.listWidget.itemDoubleClicked.connect(self.imageCollectionItemDoubleClicked)
 
+        self.closeCollectionButton.clicked.connect(self.closeCollectionButtonClicked)
+
 
     def openCollectionButtonClicked(self):
         # path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '', 'PPM Image (*.ppm)')
@@ -73,6 +75,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.mdiArea.addSubWindow(newSubWindow)
             self.imageViewerSubWindows[item.path] = newSubWindow
             newSubWindow.show()
+
+    
+    def closeCollectionButtonClicked(self):
+        item = self.listWidget.selectedItems()
+        if not item: return
+        item = item[0]
+
+        if item.path in self.imageViewerSubWindows.keys():
+            self.mdiArea.removeSubWindow(self.imageViewerSubWindows[item.path])
+            self.imageViewerSubWindows.pop(item.path)
+
+        itemTodel = self.listWidget.takeItem(self.listWidget.row(item))
+        del itemTodel
+        self.imageCollectionModels.pop(item.path)
+
 
 
 

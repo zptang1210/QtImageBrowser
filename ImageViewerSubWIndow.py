@@ -8,4 +8,4 @@ class ImageViewerSubWindow(QtWidgets.QMdiSubWindow):
         self.model = model
 
     def closeEvent(self, event):
-        self.parent.imageViewerSubWindows[self.model.path] = None
+        self.parent.imageViewerSubWindows.pop(self.model.path)
