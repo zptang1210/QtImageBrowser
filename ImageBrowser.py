@@ -1,3 +1,5 @@
+from PyQt5.QtCore import Qt
+from ImageViewerSubWIndow import ImageViewerSubWindow
 from ImageViewerWidget import ImageViewerWidget
 import sys, os
 from PyQt5 import QtWidgets, uic
@@ -28,7 +30,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         flag = self.createNewImageCollectionModel(path, name, type='folder')
         if flag:
             # insert a new item into QListWidget
-            self.addCollectionItem(path, name)
+            if self.imageCollectionModels[path].length() > 0:
+                self.addCollectionItem(path, name)
+            else:
+                QtWidgets.QMessageBox.information(self, 'Info', 'There is no image in this image collection.', QtWidgets.QMessageBox.Ok)
+                self.imageCollectionModels.pop(path)
         else:
             QtWidgets.QMessageBox.information(self, 'Info', 'This image collection has already been opened.', QtWidgets.QMessageBox.Ok)
 
@@ -54,14 +60,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def imageCollectionItemDoubleClicked(self):
         item = self.listWidget.selectedItems()[0]
-        # print(item.path)
+        print(item.path)
 
         selectedSubWindow = self.imageViewerSubWindows.get(item.path, None)
         if selectedSubWindow:
             self.mdiArea.setActiveSubWindow(selectedSubWindow)
         else:
             model = self.imageCollectionModels[item.path]
-            newSubWindow = QtWidgets.QMdiSubWindow()
+            # newSubWindow = QtWidgets.QMdiSubWindow()
+            newSubWindow = ImageViewerSubWindow(model, self)
             newSubWindow.setWidget(ImageViewerWidget(model))
             self.mdiArea.addSubWindow(newSubWindow)
             self.imageViewerSubWindows[item.path] = newSubWindow
