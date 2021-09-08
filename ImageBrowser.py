@@ -1,4 +1,5 @@
-import sys
+from ImageViewerWidget import ImageViewerWidget
+import sys, os
 from PyQt5 import QtWidgets, uic
 from ImageBrowserWindow import Ui_MainWindow
 from models.ImageCollectionFolderModel import ImageCollectionFolderModel
@@ -15,42 +16,57 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.imageViewerSubWindows = {}
         self.listWidget.itemDoubleClicked.connect(self.imageCollectionItemDoubleClicked)
 
+
     def openCollectionButtonClicked(self):
         # path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '', 'PPM Image (*.ppm)')
         path = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Image Folder', '')
-        print(path)
+        if not path:
+            return
+        name = os.path.basename(path)
 
-        if path not in self.imageCollectionModels.keys():
-            self.addCollectionItem(path, type='folder')
+        # trying to create a new data model for the image collection to opoen
+        flag = self.createNewImageCollectionModel(path, name, type='folder')
+        if flag:
+            # insert a new item into QListWidget
+            self.addCollectionItem(path, name)
         else:
-            print('already opened.')
+            QtWidgets.QMessageBox.information(self, 'Info', 'This image collection has already been opened.', QtWidgets.QMessageBox.Ok)
 
-    def addCollectionItem(self, path, type='folder'):
+
+    def createNewImageCollectionModel(self, path, name, type='folder'):
         assert type in ('folder', 'txt', 'ppm')
+        if path not in self.imageCollectionModels.keys():
+            model = ImageCollectionFolderModel(path, name)
+            self.imageCollectionModels[path] = model
+            return True
+        else:
+            return False
 
-        # insert new 
+
+    def addCollectionItem(self, path, name):
         item = QtWidgets.QListWidgetItem()
-        item.setText(path)
+        item.setText(name)
+        item.setToolTip(path)
         item.path = path
+        item.name = name
         self.listWidget.addItem(item)
 
-        model = ImageCollectionFolderModel(path)
-        self.imageCollectionModels[path] = model
 
     def imageCollectionItemDoubleClicked(self):
         item = self.listWidget.selectedItems()[0]
-        print(item.path)
+        # print(item.path)
 
         selectedSubWindow = self.imageViewerSubWindows.get(item.path, None)
         if selectedSubWindow:
             self.mdiArea.setActiveSubWindow(selectedSubWindow)
         else:
+            model = self.imageCollectionModels[item.path]
             newSubWindow = QtWidgets.QMdiSubWindow()
-            newSubWindow.setWidget(QtWidgets.QLabel(item.path))
+            newSubWindow.setWidget(ImageViewerWidget(model))
             self.mdiArea.addSubWindow(newSubWindow)
             self.imageViewerSubWindows[item.path] = newSubWindow
             newSubWindow.show()
-            
+
 
 
 if __name__ == '__main__':
