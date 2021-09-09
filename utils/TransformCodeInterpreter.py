@@ -18,7 +18,7 @@ class TransformCodeInterpreter:
 
     def parse(self, rawCode):
         code = []
-        lines = rawCode.split('\n')
+        lines = rawCode.strip().split('\n')
         for line in lines:
             line = line.strip().split(' ')
             command = line[0]
@@ -38,13 +38,14 @@ class TransformCodeInterpreter:
         return modulePath, className
 
     def run(self, code, model, newCollectionName):
+        originalRootSavePath = os.path.join(model.getRootPath(), 'transform')
         for i, (modulePath, className, argsList) in enumerate(code):
             module = importlib.import_module(modulePath)
             classMeta = getattr(module, className)
             transformer = classMeta()
 
             saveName = newCollectionName if i == len(code) - 1 else None
-            model = transformer.run(model, argsList, saveName=saveName)
+            model = transformer.run(model, argsList, rootSavePath=originalRootSavePath, saveName=saveName)
         
         return model
 

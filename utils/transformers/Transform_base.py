@@ -20,14 +20,16 @@ class Transform_base:
     def processImageCollection(self, model, args):
         pass
 
-    def run(self, model, argsList, rootSavePath=None, saveName=None):
-        if rootSavePath is None: rootSavePath = os.path.join(model.getRootPath(), '.transform')
+    def run(self, model, argsList, rootSavePath, saveName=None):
         if saveName is None: saveName = 'tmp_' + str(time.time())
         savePath = os.path.join(rootSavePath, saveName)
 
         try:
             self.argParser = self.getArgParser()
-            self.args = self.argParser.parse_args(argsList)
+            if self.argParser is None:
+                self.args = None
+            else:
+                self.args = self.argParser.parse_args(argsList)
         except Exception as e:
             print('Error occured during parsing.')
             print(e, '\n', traceback.format_exc())
@@ -40,8 +42,9 @@ class Transform_base:
             for img_np, img_name in self.processImageCollection(model, self.args):
                 img_pil = Image.fromarray(img_np)
                 img_pil.save(os.path.join(savePath, img_name+'.jpg'))
-        except ValueError:
+        except ValueError as e:
             print('Error occured during running transformation due to unknown arguments.')
+            print(e, '\n', traceback.format_exc())
             return None
         except Exception as e:
             print('Unknown error occured during running transformation.')

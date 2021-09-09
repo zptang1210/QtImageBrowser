@@ -29,6 +29,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         name = os.path.basename(path)
 
         # trying to create a new data model for the image collection to opoen
+        self.createAndAddNewImageCollection(path, name, type='folder')
+
+
+    def createAndAddNewImageCollection(self, path, name, type='folder'):
         flag = self.createNewImageCollectionModel(path, name, type='folder')
         if flag:
             # insert a new item into QListWidget
@@ -69,9 +73,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.mdiArea.setActiveSubWindow(selectedSubWindow)
         else:
             model = self.imageCollectionModels[item.path]
-            # newSubWindow = QtWidgets.QMdiSubWindow()
             newSubWindow = ImageViewerSubWindow(model, self)
-            newSubWindow.setWidget(ImageViewerWidget(model))
             self.mdiArea.addSubWindow(newSubWindow)
             self.imageViewerSubWindows[item.path] = newSubWindow
             newSubWindow.show()

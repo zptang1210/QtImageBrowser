@@ -17,6 +17,8 @@ class ImageCollectionFolderModel(ImageCollectionModel):
             glob(os.path.join(self.path, '*.tif')) + \
             glob(os.path.join(self.path, '*.bmp'))
 
+        self.imgList = sorted(self.imgList)
+
     def length(self):
         return len(self.imgList)
 

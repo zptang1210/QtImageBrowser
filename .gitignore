@@ -1,4 +1,4 @@
 *.pyc
-testSample/
+testData/
 *.jpg
 .DS_Store

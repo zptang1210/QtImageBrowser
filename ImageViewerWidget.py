@@ -7,10 +7,11 @@ from PIL import Image
 import numpy as np
 
 class ImageViewerWidget(QtWidgets.QWidget):
-    def __init__(self, model):
-        super().__init__()
+    def __init__(self, model, parent=None):
+        super().__init__(parent)
         self.setWindowTitle(model.name)
         self.model = model
+        self.parent = parent
 
         self.parser = TransformCodeInterpreter()
 
@@ -51,6 +52,10 @@ class ImageViewerWidget(QtWidgets.QWidget):
         self.slider.valueChanged.connect(self.sliderValueChanged)
         self.hLayout.addWidget(self.slider)
 
+        self.extraInfoLabel = QtWidgets.QLabel()
+        self.extraInfoLabel.setText(self.model.path)
+        self.mainLayout.addWidget(self.extraInfoLabel)
+
         self.slider.setValue(0)
         self.sliderValueChanged(0)
 
@@ -65,12 +70,21 @@ class ImageViewerWidget(QtWidgets.QWidget):
 
     def transformActionTriggered(self):
         dlg = TransformDialog(self)
-        if dlg.exec_():
-            newCollectionName = dlg.nameLineEdit.text().strip()
-            code = dlg.transformCode.toPlainText()
+        succeeded = False
+        while True:
+            if dlg.exec_():
+                newCollectionName = dlg.nameLineEdit.text().strip()
+                code = dlg.transformCode.toPlainText()
 
-            newModel = self.parser.parseAndRun(code, self.model, newCollectionName)
-            if newModel is not None:
-                print(newModel.path, newModel.name)
-            else:
-                print('failed code')
+                newModel = self.parser.parseAndRun(code, self.model, newCollectionName)
+                if newModel is not None:
+                    succeeded = True
+                    break
+                else:
+                    QtWidgets.QMessageBox.warning(self, 'Warning', 'Failed to run the commands!', QtWidgets.QMessageBox.Ok)
+            else: 
+                break
+
+        if succeeded:
+            self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + ' (temp collection)')
+            QtWidgets.QMessageBox.information(self, 'Info', f'The new image collection {newModel.name} has been opened.', QtWidgets.QMessageBox.Ok)
