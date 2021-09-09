@@ -64,7 +64,7 @@ class ImageViewerWidget(QtWidgets.QWidget):
         image_np, _ = self.model.get(value)
 
         h, w, c = image_np.shape
-        image_qimg = QImage(image_np.data, w, h, 3*w, QImage.Format_RGB888)
+        image_qimg = QImage(image_np.data.tobytes(), w, h, 3*w, QImage.Format_RGB888)
         image_pixmap = QPixmap(image_qimg)
         self.imageLabel.setPixmap(image_pixmap)
 
@@ -86,5 +86,5 @@ class ImageViewerWidget(QtWidgets.QWidget):
                 break
 
         if succeeded:
-            self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + ' (temp collection)')
+            self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + ' (temp collection)', type='folder')
             QtWidgets.QMessageBox.information(self, 'Info', f'The new image collection {newModel.name} has been opened.', QtWidgets.QMessageBox.Ok)

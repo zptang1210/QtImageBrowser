@@ -1,10 +1,12 @@
-from PyQt5.QtCore import Qt
-from ImageViewerSubWIndow import ImageViewerSubWindow
-from ImageViewerWidget import ImageViewerWidget
 import sys, os
+from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets, uic
 from ImageBrowserWindow import Ui_MainWindow
+from ImageViewerSubWIndow import ImageViewerSubWindow
+from ImageViewerWidget import ImageViewerWidget
 from models.ImageCollectionFolderModel import ImageCollectionFolderModel
+from models.ImageCollectionPPMModel import ImageCollectionPPMModel
+from ImageCollectionSelectionDialog import ImageCollectionSelectionDialog
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -22,18 +24,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def openCollectionButtonClicked(self):
-        # path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '', 'PPM Image (*.ppm)')
-        path = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Image Folder', '')
-        if not path:
-            return
-        name = os.path.basename(path)
+        diag = ImageCollectionSelectionDialog(self)
+        if diag.exec_():
+            path = diag.getPath()
+            name = diag.getName()
 
-        # trying to create a new data model for the image collection to opoen
-        self.createAndAddNewImageCollection(path, name, type='folder')
+            # trying to create a new data model for the image collection to open and add item to the QListWidget
+            self.createAndAddNewImageCollection(path, name, type=diag.getType())
 
 
-    def createAndAddNewImageCollection(self, path, name, type='folder'):
-        flag = self.createNewImageCollectionModel(path, name, type='folder')
+    def createAndAddNewImageCollection(self, path, name, type):
+        flag = self.createNewImageCollectionModel(path, name, type)
         if flag:
             # insert a new item into QListWidget
             if self.imageCollectionModels[path].length() > 0:
@@ -45,10 +46,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             QtWidgets.QMessageBox.information(self, 'Info', 'This image collection has already been opened.', QtWidgets.QMessageBox.Ok)
 
 
-    def createNewImageCollectionModel(self, path, name, type='folder'):
-        assert type in ('folder', 'txt', 'ppm')
+    def createNewImageCollectionModel(self, path, name, type):
+        assert type in ('folder', 'video', 'ppm')
+        modelClassDict = {'folder': ImageCollectionFolderModel, 'ppm': ImageCollectionPPMModel} # TODO: video model
         if path not in self.imageCollectionModels.keys():
-            model = ImageCollectionFolderModel(path, name)
+            modelClass = modelClassDict[type]
+            model = modelClass(path, name)
             self.imageCollectionModels[path] = model
             return True
         else:

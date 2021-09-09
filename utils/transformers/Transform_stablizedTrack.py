@@ -142,3 +142,5 @@ class Transform_stablizedTrack(Transform_base):
             print('An error occurd in the tracker. May caused by missing the tracking object.')
             cv2.destroyAllWindows()
             return
+        finally:
+            cv2.destroyAllWindows()
