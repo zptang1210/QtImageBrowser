@@ -11,7 +11,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.show()
-
+        
         self.imageCollectionModels = {}
         self.openCollectionButton.clicked.connect(self.openCollectionButtonClicked)
 

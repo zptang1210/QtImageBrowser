@@ -1,3 +1,4 @@
 *.pyc
 testSample/
 *.jpg
+.DS_Store
