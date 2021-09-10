@@ -5,6 +5,7 @@ from ImageBrowserWindow import Ui_MainWindow
 from ImageViewerSubWIndow import ImageViewerSubWindow
 from ImageViewerWidget import ImageViewerWidget
 from models.ImageCollectionFolderModel import ImageCollectionFolderModel
+from models.ImageCollectionVideoModel import ImageCollectionVideoModel
 from models.ImageCollectionPPMModel import ImageCollectionPPMModel
 from ImageCollectionSelectionDialog import ImageCollectionSelectionDialog
 
@@ -48,7 +49,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def createNewImageCollectionModel(self, path, name, type):
         assert type in ('folder', 'video', 'ppm')
-        modelClassDict = {'folder': ImageCollectionFolderModel, 'ppm': ImageCollectionPPMModel} # TODO: video model
+        modelClassDict = {'folder': ImageCollectionFolderModel, 'video': ImageCollectionVideoModel,'ppm': ImageCollectionPPMModel}
         if path not in self.imageCollectionModels.keys():
             modelClass = modelClassDict[type]
             model = modelClass(path, name)
