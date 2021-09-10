@@ -56,7 +56,8 @@ class Transform_stablizedTrack(Transform_base):
         frame = cv2.resize(frame, (3*frame.shape[1]//4, 3*frame.shape[0]//4))
 
         # Uncomment the line below to select a different bounding box
-        bbox = cv2.selectROI(frame, False)
+        frame_ = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        bbox = cv2.selectROI(frame_, False)
 
         # Initialize tracker with first frame and bounding box
         ok = self.tracker.init(frame, bbox)
@@ -132,6 +133,7 @@ class Transform_stablizedTrack(Transform_base):
                 #cv2.imwrite(os.path.join('dst',"%06d.png"%(count)), frame)
 
                 frame_with_viz = np.concatenate((frame, flowviz), axis=1)
+                frame_with_viz = cv2.resize(frame_with_viz, (3*frame_with_viz.shape[1]//4, 3*frame_with_viz.shape[0]//4))
                 yield frame_with_viz, str(idx)
                 count += 1
                 del frame
