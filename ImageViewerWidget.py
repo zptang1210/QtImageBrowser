@@ -53,7 +53,7 @@ class ImageViewerWidget(QtWidgets.QWidget):
         self.hLayout.addWidget(self.slider)
 
         self.extraInfoLabel = QtWidgets.QLabel()
-        self.extraInfoLabel.setText(self.model.path)
+        self.extraInfoLabel.setText(f'{self.model.path}')
         self.mainLayout.addWidget(self.extraInfoLabel)
 
         self.slider.setValue(0)
@@ -61,12 +61,14 @@ class ImageViewerWidget(QtWidgets.QWidget):
 
 
     def sliderValueChanged(self, value):
-        image_np, _ = self.model.get(value)
+        image_np, image_name = self.model.get(value)
 
         h, w, c = image_np.shape
         image_qimg = QImage(image_np.data.tobytes(), w, h, 3*w, QImage.Format_RGB888)
         image_pixmap = QPixmap(image_qimg)
         self.imageLabel.setPixmap(image_pixmap)
+
+        self.extraInfoLabel.setText(f'{self.model.path} {image_name}')
 
     def transformActionTriggered(self):
         dlg = TransformDialog(self)

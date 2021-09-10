@@ -134,7 +134,7 @@ class Transform_stablizedTrack(Transform_base):
 
                 frame_with_viz = np.concatenate((frame, flowviz), axis=1)
                 frame_with_viz = cv2.resize(frame_with_viz, (3*frame_with_viz.shape[1]//4, 3*frame_with_viz.shape[0]//4))
-                yield frame_with_viz, str(idx)
+                yield frame_with_viz, model.getImgName(idx)
                 count += 1
                 del frame
 

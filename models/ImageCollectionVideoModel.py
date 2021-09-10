@@ -23,7 +23,7 @@ class ImageCollectionVideoModel(ImageCollectionModel):
 
     def getImgName(self, idx):
         assert idx >= 0 and idx < self.length()
-        return 'frame_' + str(idx)
+        return 'frame_' + ('%06d' % idx)
 
     def getRootPath(self):
         return os.path.dirname(self.path)

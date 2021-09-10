@@ -21,7 +21,7 @@ class ImageCollectionPPMModel(ImageCollectionModel):
 
     def getImgName(self, idx):
         assert idx >= 0 and idx < len(self.imgList)
-        return str(idx)
+        return ('%06d' % idx)
 
     def getRootPath(self):
         return os.path.dirname(self.path)
