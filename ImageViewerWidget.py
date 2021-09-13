@@ -68,7 +68,7 @@ class ImageViewerWidget(QtWidgets.QWidget):
         image_pixmap = QPixmap(image_qimg)
         self.imageLabel.setPixmap(image_pixmap)
 
-        self.extraInfoLabel.setText(f'{self.model.path} {image_name}')
+        self.extraInfoLabel.setText(f'{image_name}')
 
     def transformActionTriggered(self):
         dlg = TransformDialog(self)
