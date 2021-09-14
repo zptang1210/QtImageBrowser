@@ -1,12 +1,10 @@
-import sys, os
-from PyQt5.QtCore import Qt
-from PyQt5 import QtWidgets, uic
-from ImageBrowserWindow import Ui_MainWindow
-from ImageViewerSubWIndow import ImageViewerSubWindow
-from ImageViewerWidget import ImageViewerWidget
+import sys
 from models.ImageCollectionFolderModel import ImageCollectionFolderModel
 from models.ImageCollectionVideoModel import ImageCollectionVideoModel
 from models.ImageCollectionPPMModel import ImageCollectionPPMModel
+from PyQt5 import QtWidgets
+from ImageBrowserWindow import Ui_MainWindow
+from ImageViewerSubWindow import ImageViewerSubWindow
 from ImageCollectionSelectionDialog import ImageCollectionSelectionDialog
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
