@@ -25,3 +25,7 @@ class ImageCollectionModel:
         img = self.getImg(idx)
         name = self.getImgName(idx)
         return img, name
+
+    @staticmethod
+    def saveModel(modelToSave, savePath):
+        pass

@@ -25,3 +25,18 @@ class ImageCollectionPPMModel(ImageCollectionModel):
 
     def getRootPath(self):
         return os.path.dirname(self.path)
+
+    @staticmethod
+    def saveModel(modelToSave, savePath, numPerRow=10):
+        img_list = []
+        for idx in range(modelToSave.length()):
+            img_np = modelToSave.getImg(idx)
+            img_list.append(img_np)
+
+        img_shape = img_list[0].shape
+        for img_np in img_list:
+            if img_np.shape != img_shape:
+                return False
+        
+        PPMProcessor.writeSuperPPM(img_list, savePath, numPerRow=numPerRow)
+        return True

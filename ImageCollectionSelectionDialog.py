@@ -1,5 +1,4 @@
 import os
-from models.ImageCollectionFolderModel import ImageCollectionFolderModel
 from PyQt5 import QtWidgets
 
 class ImageCollectionSelectionDialog(QtWidgets.QDialog):
@@ -7,6 +6,9 @@ class ImageCollectionSelectionDialog(QtWidgets.QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setupUI()
+
+    def setupUI(self):
         self.setWindowTitle('Choose path')
 
         QBtn = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
@@ -38,59 +40,25 @@ class ImageCollectionSelectionDialog(QtWidgets.QDialog):
 
         self.setLayout(self.layout)
 
-    def fileDialogButtonClicked(self):
-        selectedType = self.typeComboBox.currentText()
-        if selectedType == ImageCollectionSelectionDialog.availTypes[0]:
-            path = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Image Folder', '')
-        elif selectedType == ImageCollectionSelectionDialog.availTypes[1]:
-            path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '', 'Videos (*.mp4 *.avi)')
-        elif selectedType == ImageCollectionSelectionDialog.availTypes[2]:
-            path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '', 'PPM Image (*.ppm)')
-        else:
-            path = None
-
-        if path:
-            self.pathLineEdit.setText(path)
-        else:
-            self.pathLineEdit.setText(None)
-
     def buttonOKClicked(self):
-        selectedType = self.typeComboBox.currentText()
-        path = self.getPath()
-
-        invalid = False
-        if selectedType == ImageCollectionSelectionDialog.availTypes[0]:
-            if not os.path.exists(path):
-                invalid = True
-        elif selectedType == ImageCollectionSelectionDialog.availTypes[1]:
-            if (not os.path.exists(path)) or (os.path.splitext(path)[1].lower() not in ('.mp4', '.avi')):
-                invalid = True
-        elif selectedType == ImageCollectionSelectionDialog.availTypes[2]:
-            if (not os.path.exists(path)) or (os.path.splitext(path)[1].lower() != '.ppm'):
-                invalid = True
-        else:
-            invalid = True
-
-        if not invalid:
-            self.accept()
-        else:
-            QtWidgets.QMessageBox.warning(self, 'Warning', 'Invalid path.', QtWidgets.QMessageBox.Ok)
+        self.accept()
+    
+    def fileDialogButtonClicked(self):
+        pass
 
     def getPath(self):
         return self.pathLineEdit.text()
 
     def getName(self):
-        name = self.nameLineEdit.text().strip()
-        if name == '':
-            return os.path.basename(self.getPath())
-        else:
-            return name
+        return self.nameLineEdit.text().strip()
+
+    def setName(self, text):
+        self.nameLineEdit.setText(text)
     
     def getType(self):
         selectedType = self.typeComboBox.currentText()
         assert selectedType in ImageCollectionSelectionDialog.availTypes
         return selectedType
-
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])

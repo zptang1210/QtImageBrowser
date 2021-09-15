@@ -1,4 +1,5 @@
 import os
+import cv2
 from decord import VideoReader
 from decord import cpu
 
@@ -27,3 +28,21 @@ class ImageCollectionVideoModel(ImageCollectionModel):
 
     def getRootPath(self):
         return os.path.dirname(self.path)
+
+    @staticmethod
+    def saveModel(modelToSave, savePath, fps=30):
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        img_size = modelToSave.getImg(0).shape
+        size = img_size[:2]
+        out = cv2.VideoWriter(savePath, fourcc, fps, size)
+        try:
+            for idx in range(modelToSave.length()):
+                img_np = modelToSave.getImg(idx)
+                img_np = cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)
+                out.write(img_np)
+        except:
+            return False
+        finally:
+            out.release()
+            
+        return True

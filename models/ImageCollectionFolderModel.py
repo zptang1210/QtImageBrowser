@@ -36,3 +36,15 @@ class ImageCollectionFolderModel(ImageCollectionModel):
 
     def getRootPath(self):
         return self.path
+
+    @staticmethod
+    def saveModel(modelToSave, savePath):
+        if not os.path.exists(savePath):
+            os.makedirs(savePath) 
+        
+        for idx in range(modelToSave.length()):
+            img_np, name = modelToSave.get(idx)
+            img_pil = Image.fromarray(img_np)
+            img_pil.save(os.path.join(savePath, name+'.jpg'))
+        
+        return True

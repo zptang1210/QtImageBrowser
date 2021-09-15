@@ -1,11 +1,13 @@
-import sys
+import sys, os
 from models.ImageCollectionFolderModel import ImageCollectionFolderModel
 from models.ImageCollectionVideoModel import ImageCollectionVideoModel
 from models.ImageCollectionPPMModel import ImageCollectionPPMModel
-from PyQt5 import QtWidgets
 from ImageBrowserWindow import Ui_MainWindow
 from ImageViewerSubWindow import ImageViewerSubWindow
-from ImageCollectionSelectionDialog import ImageCollectionSelectionDialog
+from utils.saveImageCollection import saveImageCollection
+from ImageCollectionSaveDialog import ImageCollectionSaveDialog
+from ImageCollectionOpenDialog import ImageCollectionOpenDialog
+from PyQt5 import QtWidgets
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -19,11 +21,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.imageViewerSubWindows = {}
         self.listWidget.itemDoubleClicked.connect(self.imageCollectionItemDoubleClicked)
 
+        self.saveCollectionButton.clicked.connect(self.saveCollectionButtonClicked)
+
         self.closeCollectionButton.clicked.connect(self.closeCollectionButtonClicked)
 
 
     def openCollectionButtonClicked(self):
-        diag = ImageCollectionSelectionDialog(self)
+        diag = ImageCollectionOpenDialog(self)
         if diag.exec_():
             path = diag.getPath()
             name = diag.getName()
@@ -68,7 +72,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def imageCollectionItemDoubleClicked(self):
         item = self.listWidget.selectedItems()[0]
-        print(item.path)
 
         selectedSubWindow = self.imageViewerSubWindows.get(item.path, None)
         if selectedSubWindow:
@@ -79,6 +82,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.mdiArea.addSubWindow(newSubWindow)
             self.imageViewerSubWindows[item.path] = newSubWindow
             newSubWindow.show()
+
+    
+    def saveCollectionButtonClicked(self):
+        items = self.listWidget.selectedItems()
+        if len(items) == 0:
+            QtWidgets.QMessageBox.warning(self, 'Warning', 'Please select an image collection to save.', QtWidgets.QMessageBox.Ok)
+            return
+        else:
+            item = items[0]
+        
+        diag = ImageCollectionSaveDialog(self)
+        if diag.exec_():
+            path = diag.getPath()
+            name = diag.getName()
+            savePath = os.path.join(path, name)
+            targetType = diag.getType()
+
+            modelToSave = self.imageCollectionModels[item.path]
+            flag = saveImageCollection(modelToSave, savePath, targetType)
+            if flag:
+                self.createAndAddNewImageCollection(savePath, name, targetType)
+            else:
+                QtWidgets.QMessageBox.warning(self, 'Warning', 'Error occurs during saving.', QtWidgets.QMessageBox.Ok)
 
     
     def closeCollectionButtonClicked(self):
