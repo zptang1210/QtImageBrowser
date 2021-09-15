@@ -32,7 +32,7 @@
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QListWidget" name="listWidget"/>
+      <widget class="QTreeWidget" name="treeWidget"/>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">

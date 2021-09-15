@@ -19,7 +19,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.openCollectionButton.clicked.connect(self.openCollectionButtonClicked)
 
         self.imageViewerSubWindows = {}
-        self.listWidget.itemDoubleClicked.connect(self.imageCollectionItemDoubleClicked)
+        self.treeWidget.itemDoubleClicked.connect(self.imageCollectionItemDoubleClicked)
 
         self.saveCollectionButton.clicked.connect(self.saveCollectionButtonClicked)
 
@@ -36,42 +36,63 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.createAndAddNewImageCollection(path, name, type=diag.getType())
 
 
-    def createAndAddNewImageCollection(self, path, name, type):
-        flag = self.createNewImageCollectionModel(path, name, type)
+    def createAndAddNewImageCollection(self, path, name, type, rootModel=None):
+        flag = self.createNewImageCollectionModel(path, name, type, rootModel=rootModel)
         if flag:
             # insert a new item into QListWidget
             if self.imageCollectionModels[path].length() > 0:
-                self.addCollectionItem(path, name)
+                self.addCollectionItem(path, name, rootModel=rootModel)
+                return True
             else:
                 QtWidgets.QMessageBox.information(self, 'Info', 'There is no image in this image collection.', QtWidgets.QMessageBox.Ok)
                 self.imageCollectionModels.pop(path)
+                return False
         else:
             QtWidgets.QMessageBox.information(self, 'Info', 'This image collection has already been opened.', QtWidgets.QMessageBox.Ok)
+            return False
 
 
-    def createNewImageCollectionModel(self, path, name, type):
+    def createNewImageCollectionModel(self, path, name, type, rootModel=None):
         assert type in ('folder', 'video', 'ppm')
         modelClassDict = {'folder': ImageCollectionFolderModel, 'video': ImageCollectionVideoModel,'ppm': ImageCollectionPPMModel}
         if path not in self.imageCollectionModels.keys():
             modelClass = modelClassDict[type]
-            model = modelClass(path, name)
+            model = modelClass(path, name, rootModel=rootModel)
             self.imageCollectionModels[path] = model
             return True
         else:
             return False
 
 
-    def addCollectionItem(self, path, name):
-        item = QtWidgets.QListWidgetItem()
-        item.setText(name)
-        item.setToolTip(path)
-        item.path = path
-        item.name = name
-        self.listWidget.addItem(item)
+    def addCollectionItem(self, path, name, rootModel=None):
+        if rootModel:
+            rootItem = None
+            for idx in range(self.treeWidget.topLevelItemCount()):
+                item = self.treeWidget.topLevelItem(idx)
+                if item.path == rootModel.path:
+                    rootItem = item
+            assert rootItem is not None
+
+            item = QtWidgets.QTreeWidgetItem(rootItem)
+            item.setText(0, name)
+            item.setToolTip(0, path)
+            item.path = path
+            item.name = name
+
+            self.treeWidget.expandItem(rootItem)
+            self.treeWidget.setCurrentItem(item)
+        else:
+            item = QtWidgets.QTreeWidgetItem(self.treeWidget)
+            item.setText(0, name)
+            item.setToolTip(0, path)
+            item.path = path
+            item.name = name
+            self.treeWidget.addTopLevelItem(item)
+            self.treeWidget.setCurrentItem(item)
 
 
     def imageCollectionItemDoubleClicked(self):
-        item = self.listWidget.selectedItems()[0]
+        item = self.treeWidget.selectedItems()[0]
 
         selectedSubWindow = self.imageViewerSubWindows.get(item.path, None)
         if selectedSubWindow:
@@ -85,7 +106,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     
     def saveCollectionButtonClicked(self):
-        items = self.listWidget.selectedItems()
+        items = self.treeWidget.selectedItems()
         if len(items) == 0:
             QtWidgets.QMessageBox.warning(self, 'Warning', 'Please select an image collection to save.', QtWidgets.QMessageBox.Ok)
             return
@@ -108,17 +129,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     
     def closeCollectionButtonClicked(self):
-        item = self.listWidget.selectedItems()
+        item = self.treeWidget.selectedItems()
         if not item: return
         item = item[0]
+        parent = item.parent()
 
         if item.path in self.imageViewerSubWindows.keys():
+            for idx in range(item.childCount()):
+                subItem = item.child(idx)
+                self.mdiArea.removeSubWindow(self.imageViewerSubWindows[subItem.path])
+                self.imageViewerSubWindows.pop(subItem.path)
+                
             self.mdiArea.removeSubWindow(self.imageViewerSubWindows[item.path])
             self.imageViewerSubWindows.pop(item.path)
 
-        itemTodel = self.listWidget.takeItem(self.listWidget.row(item))
-        del itemTodel
+        for idx in range(item.childCount()):
+            subItem = item.child(idx)
+            self.imageCollectionModels.pop(subItem.path)
+        item.takeChildren()
+        
         self.imageCollectionModels.pop(item.path)
+        if parent:
+            parent.removeChild(item)
+        else:
+            self.treeWidget.takeTopLevelItem(self.treeWidget.indexOfTopLevelItem(item))
+        del item
 
 
 

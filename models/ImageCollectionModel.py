@@ -3,7 +3,9 @@ from abc import abstractmethod
 
 class ImageCollectionModel:
     def __init__(self):
-        pass
+        self.path = None
+        self.name = None
+        self.rootModel = None
 
     @abstractmethod
     def length(self):

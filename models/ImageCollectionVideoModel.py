@@ -7,10 +7,11 @@ from models.ImageCollectionModel import ImageCollectionModel
 
 
 class ImageCollectionVideoModel(ImageCollectionModel):
-    def __init__(self, path, name):
+    def __init__(self, path, name, rootModel=None):
         super().__init__()
         self.path = path
         self.name = name
+        self.rootModel = rootModel
 
         self.vr = VideoReader(self.path, ctx=cpu(0))
 
@@ -34,7 +35,7 @@ class ImageCollectionVideoModel(ImageCollectionModel):
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         img_size = modelToSave.getImg(0).shape
         size = img_size[:2]
-        out = cv2.VideoWriter(savePath, fourcc, fps, size)
+        out = cv2.VideoWriter(savePath, fourcc, fps, (size[1], size[0]))
         try:
             for idx in range(modelToSave.length()):
                 img_np = modelToSave.getImg(idx)

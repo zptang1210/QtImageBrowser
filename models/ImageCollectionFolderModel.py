@@ -5,10 +5,11 @@ import numpy as np
 from models.ImageCollectionModel import ImageCollectionModel
 
 class ImageCollectionFolderModel(ImageCollectionModel):
-    def __init__(self, path, name):
+    def __init__(self, path, name, rootModel=None):
         super().__init__()
         self.path = path
         self.name = name
+        self.rootModel = rootModel
 
         self.imgList = glob(os.path.join(self.path, '*.png')) + \
             glob(os.path.join(self.path, '*.jpg')) + \

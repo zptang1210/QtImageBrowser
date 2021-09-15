@@ -88,5 +88,7 @@ class ImageViewerWidget(QtWidgets.QWidget):
                 break
 
         if succeeded:
-            self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + ' (temp collection)', type='folder')
-            QtWidgets.QMessageBox.information(self, 'Info', f'The new image collection {newModel.name} has been opened.', QtWidgets.QMessageBox.Ok)
+            rootModel = self.model.rootModel if self.model.rootModel else self.model
+            flag = self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + ' (temp collection)', type='folder', rootModel=rootModel)
+            if flag:
+                QtWidgets.QMessageBox.information(self, 'Info', f'The new image collection {newModel.name} has been opened.', QtWidgets.QMessageBox.Ok)

@@ -3,10 +3,11 @@ from models.ImageCollectionModel import ImageCollectionModel
 from utils import PPMProcessor
 
 class ImageCollectionPPMModel(ImageCollectionModel):
-    def __init__(self, path, name):
+    def __init__(self, path, name, rootModel=None):
         super().__init__()
         self.path = path
         self.name = name
+        self.rootModel = rootModel
 
         self.imgList = PPMProcessor.readSuperPPM(self.path)
 
