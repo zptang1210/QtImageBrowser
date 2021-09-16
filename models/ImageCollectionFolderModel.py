@@ -38,6 +38,9 @@ class ImageCollectionFolderModel(ImageCollectionModel):
     def getRootPath(self):
         return self.path
 
+    def getImgPath(self, idx):
+        return self.imgList[idx]
+
     @staticmethod
     def saveModel(modelToSave, savePath):
         if not os.path.exists(savePath):

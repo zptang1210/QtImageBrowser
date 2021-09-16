@@ -30,6 +30,9 @@ class ImageCollectionVideoModel(ImageCollectionModel):
     def getRootPath(self):
         return os.path.dirname(self.path)
 
+    def getImgPath(self, idx):
+        return self.path + f':{idx}'
+
     @staticmethod
     def saveModel(modelToSave, savePath, fps=30):
         fourcc = cv2.VideoWriter_fourcc(*'XVID')

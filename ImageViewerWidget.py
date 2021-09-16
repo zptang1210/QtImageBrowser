@@ -2,7 +2,7 @@ from utils.TransformCodeInterpreter import TransformCodeInterpreter
 from TransformDialog import TransformDialog
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
-from PyQt5.QtGui import QImage, QPixmap, qRgb
+from PyQt5.QtGui import QIcon, QImage, QPixmap, qRgb
 from PIL import Image
 import numpy as np
 
@@ -16,10 +16,34 @@ class ImageViewerWidget(QtWidgets.QWidget):
         self.parser = TransformCodeInterpreter()
 
         self.toolbar = QtWidgets.QToolBar()
+        # self.toolbar.setToolButtonStyle(Qt.ToolButtonIconOnly)
 
         self.transformAction = QtWidgets.QAction('Transform', self)
+        # self.transformAction = QtWidgets.QAction(QIcon('resources/icons/transformIcon.ico'), 'Transform', self)
+        self.transformAction.setShortcut('Ctrl+T')
         self.toolbar.addAction(self.transformAction)
         self.transformAction.triggered.connect(self.transformActionTriggered)
+
+        self.labelToolButton = QtWidgets.QToolButton()
+        self.labelToolButton.setText('Label ')
+        self.labelToolButton.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+
+        self.labelMenu = QtWidgets.QMenu()
+        self.labelActions = []
+        for i in range(3):
+            labelAction = QtWidgets.QAction('label ' + str(i), self)
+            labelAction.setShortcut('Ctrl+' + str(i))
+            labelAction.setCheckable(True)
+            self.labelActions.append(labelAction)
+            self.labelMenu.addAction(labelAction)
+        self.labelToolButton.setMenu(self.labelMenu)
+
+        self.getPathAction = QtWidgets.QAction('Copy Path', self)
+        self.getPathAction.setShortcut('Ctrl+C')
+        self.toolbar.addAction(self.getPathAction)
+        self.getPathAction.triggered.connect(self.getPathActionTriggered)
+
+        self.toolbar.addWidget(self.labelToolButton)
         
         self.mainLayout = QtWidgets.QVBoxLayout()
         self.mainLayout.setMenuBar(self.toolbar)
@@ -92,3 +116,9 @@ class ImageViewerWidget(QtWidgets.QWidget):
             flag = self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + ' (temp collection)', type='folder', rootModel=rootModel)
             if flag:
                 QtWidgets.QMessageBox.information(self, 'Info', f'The new image collection {newModel.name} has been opened.', QtWidgets.QMessageBox.Ok)
+
+    def getPathActionTriggered(self):
+        currentIdx = self.slider.value()
+        path = self.model.getImgPath(currentIdx)
+        clipboard = QtWidgets.QApplication.clipboard()
+        clipboard.setText(path)

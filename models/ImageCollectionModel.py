@@ -23,6 +23,10 @@ class ImageCollectionModel:
     def getImgName(self, idx):
         pass
 
+    @abstractmethod
+    def getImgPath(self, idx):
+        pass
+
     def get(self, idx):
         img = self.getImg(idx)
         name = self.getImgName(idx)

@@ -27,6 +27,9 @@ class ImageCollectionPPMModel(ImageCollectionModel):
     def getRootPath(self):
         return os.path.dirname(self.path)
 
+    def getImgPath(self, idx):
+        return self.path + f':{idx}'
+
     @staticmethod
     def saveModel(modelToSave, savePath, numPerRow=10):
         img_list = []
