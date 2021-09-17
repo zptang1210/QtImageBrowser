@@ -5,11 +5,11 @@ import numpy as np
 from models.ImageCollectionModel import ImageCollectionModel
 
 class ImageCollectionFolderModel(ImageCollectionModel):
-    def __init__(self, path, name, rootModel=None):
+    def __init__(self, path, name, parentModel=None):
         super().__init__()
-        self.path = path
+        self.path = os.path.normpath(path)
         self.name = name
-        self.rootModel = rootModel
+        self.parentModel = parentModel
 
         self.imgList = glob(os.path.join(self.path, '*.png')) + \
             glob(os.path.join(self.path, '*.jpg')) + \
@@ -18,13 +18,14 @@ class ImageCollectionFolderModel(ImageCollectionModel):
             glob(os.path.join(self.path, '*.tif')) + \
             glob(os.path.join(self.path, '*.bmp'))
 
+        self.imgList = list(map(os.path.normpath, self.imgList))
         self.imgList = sorted(self.imgList)
 
     def length(self):
         return len(self.imgList)
 
     def getImg(self, idx):
-        assert idx >= 0 and idx < len(self.imgList)
+        assert idx >= 0 and self.length()
         image_pil = Image.open(self.imgList[idx])
         image_pil = image_pil.convert('RGB')
         image_np = np.asarray(image_pil)
@@ -32,14 +33,17 @@ class ImageCollectionFolderModel(ImageCollectionModel):
         return image_np
 
     def getImgName(self, idx):
-        assert idx >= 0 and idx < len(self.imgList)
+        assert idx >= 0 and idx < self.length()
         return os.path.splitext(os.path.basename(self.imgList[idx]))[0]
 
     def getRootPath(self):
-        return self.path
+        return os.path.normpath(self.path)
 
-    def getImgPath(self, idx):
-        return self.imgList[idx]
+    def getImgInfo(self, idx):
+        path = os.path.normpath(self.imgList[idx])
+        rootPath = self.getRootPath()
+        idx = idx
+        return {'idx': idx, 'path': path, 'rootPath': rootPath}
 
     @staticmethod
     def saveModel(modelToSave, savePath):

@@ -47,7 +47,7 @@ class ImageCollectionSelectionDialog(QtWidgets.QDialog):
         pass
 
     def getPath(self):
-        return self.pathLineEdit.text()
+        return os.path.normpath(self.pathLineEdit.text())
 
     def getName(self):
         return self.nameLineEdit.text().strip()

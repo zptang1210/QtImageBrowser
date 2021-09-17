@@ -20,6 +20,7 @@ class ImageCollectionOpenDialog(ImageCollectionSelectionDialog):
             path = None
 
         if path:
+            path = os.path.normpath(path)
             self.pathLineEdit.setText(path)
         else:
             self.pathLineEdit.setText(None)

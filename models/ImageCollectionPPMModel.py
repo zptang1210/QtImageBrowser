@@ -3,11 +3,11 @@ from models.ImageCollectionModel import ImageCollectionModel
 from utils import PPMProcessor
 
 class ImageCollectionPPMModel(ImageCollectionModel):
-    def __init__(self, path, name, rootModel=None):
+    def __init__(self, path, name, parentModel=None):
         super().__init__()
-        self.path = path
+        self.path = os.path.normpath(path)
         self.name = name
-        self.rootModel = rootModel
+        self.parentModel = parentModel
 
         self.imgList = PPMProcessor.readSuperPPM(self.path)
 
@@ -15,20 +15,23 @@ class ImageCollectionPPMModel(ImageCollectionModel):
         return len(self.imgList)
 
     def getImg(self, idx):
-        assert idx >= 0 and idx < len(self.imgList)
+        assert idx >= 0 and idx < self.length()
         image_np = self.imgList[idx]
 
         return image_np
 
     def getImgName(self, idx):
-        assert idx >= 0 and idx < len(self.imgList)
+        assert idx >= 0 and idx < self.length()
         return ('%06d' % idx)
 
     def getRootPath(self):
-        return os.path.dirname(self.path)
+        return os.path.normpath(os.path.dirname(self.path))
 
-    def getImgPath(self, idx):
-        return self.path + f':{idx}'
+    def getImgInfo(self, idx):
+        path = os.path.normpath(self.path) + f':{idx}'
+        rootPath = self.getRootPath()
+        idx = idx
+        return {'idx': idx, 'path': path, 'rootPath': rootPath}
 
     @staticmethod
     def saveModel(modelToSave, savePath, numPerRow=10):

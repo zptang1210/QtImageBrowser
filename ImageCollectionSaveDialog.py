@@ -12,6 +12,7 @@ class ImageCollectionSaveDialog(ImageCollectionSelectionDialog):
     def fileDialogButtonClicked(self):
         path = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Image Folder', '')
         if path:
+            path = os.path.normpath(path)
             self.pathLineEdit.setText(path)
         else:
             self.pathLineEdit.setText(None)

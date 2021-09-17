@@ -36,12 +36,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.createAndAddNewImageCollection(path, name, type=diag.getType())
 
 
-    def createAndAddNewImageCollection(self, path, name, type, rootModel=None):
-        flag = self.createNewImageCollectionModel(path, name, type, rootModel=rootModel)
+    def createAndAddNewImageCollection(self, path, name, type, parentModel=None):
+        flag, model = self.createNewImageCollectionModel(path, name, type, parentModel=parentModel)
         if flag:
             # insert a new item into QListWidget
             if self.imageCollectionModels[path].length() > 0:
-                self.addCollectionItem(path, name, rootModel=rootModel)
+                self.addCollectionItem(model)
                 return True
             else:
                 QtWidgets.QMessageBox.information(self, 'Info', 'There is no image in this image collection.', QtWidgets.QMessageBox.Ok)
@@ -52,20 +52,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return False
 
 
-    def createNewImageCollectionModel(self, path, name, type, rootModel=None):
+    def createNewImageCollectionModel(self, path, name, type, parentModel=None):
         assert type in ('folder', 'video', 'ppm')
         modelClassDict = {'folder': ImageCollectionFolderModel, 'video': ImageCollectionVideoModel,'ppm': ImageCollectionPPMModel}
         if path not in self.imageCollectionModels.keys():
             modelClass = modelClassDict[type]
-            model = modelClass(path, name, rootModel=rootModel)
+            model = modelClass(path, name, parentModel=parentModel)
             self.imageCollectionModels[path] = model
-            return True
+            return True, model
         else:
-            return False
+            return False, None
 
 
-    def addCollectionItem(self, path, name, rootModel=None):
-        if rootModel:
+    def addCollectionItem(self, model):
+        path = model.path
+        name = model.name
+        if model.isRootModel(): # this model is a root model, insert it into the top level of the widget
+            item = QtWidgets.QTreeWidgetItem(self.treeWidget)
+            item.setText(0, name)
+            item.setToolTip(0, path)
+            item.path = path
+            item.name = name
+            self.treeWidget.addTopLevelItem(item)
+            self.treeWidget.setCurrentItem(item)
+        else: # this model is not a root model, add this model as a child of the root model
+            rootModel = model.getRootModel()
             rootItem = None
             for idx in range(self.treeWidget.topLevelItemCount()):
                 item = self.treeWidget.topLevelItem(idx)
@@ -80,14 +91,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             item.name = name
 
             self.treeWidget.expandItem(rootItem)
-            self.treeWidget.setCurrentItem(item)
-        else:
-            item = QtWidgets.QTreeWidgetItem(self.treeWidget)
-            item.setText(0, name)
-            item.setToolTip(0, path)
-            item.path = path
-            item.name = name
-            self.treeWidget.addTopLevelItem(item)
             self.treeWidget.setCurrentItem(item)
 
 

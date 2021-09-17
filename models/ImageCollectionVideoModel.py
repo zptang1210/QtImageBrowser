@@ -7,11 +7,11 @@ from models.ImageCollectionModel import ImageCollectionModel
 
 
 class ImageCollectionVideoModel(ImageCollectionModel):
-    def __init__(self, path, name, rootModel=None):
+    def __init__(self, path, name, parentModel=None):
         super().__init__()
-        self.path = path
+        self.path = os.path.normpath(path)
         self.name = name
-        self.rootModel = rootModel
+        self.parentModel = parentModel
 
         self.vr = VideoReader(self.path, ctx=cpu(0))
 
@@ -28,10 +28,13 @@ class ImageCollectionVideoModel(ImageCollectionModel):
         return 'frame_' + ('%06d' % idx)
 
     def getRootPath(self):
-        return os.path.dirname(self.path)
+        return os.path.normpath(os.path.dirname(self.path))
 
-    def getImgPath(self, idx):
-        return self.path + f':{idx}'
+    def getImgInfo(self, idx):
+        path = os.path.normpath(self.path) + f':{idx}'
+        rootPath = self.getRootPath()
+        idx = idx
+        return {'idx': idx, 'path': path, 'rootPath': rootPath}
 
     @staticmethod
     def saveModel(modelToSave, savePath, fps=30):
