@@ -2,3 +2,4 @@
 testData/
 *.jpg
 .DS_Store
+.idea/
