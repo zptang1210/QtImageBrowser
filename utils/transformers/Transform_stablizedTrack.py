@@ -5,7 +5,7 @@ from utils.transformers.Transform_base import Transform_base
 
 
 class Transform_stablizedTrack(Transform_base):
-    command = 'stablizedTrack'
+    command = 'stabilizedTrack'
 
     def __init__(self):
         super().__init__()
