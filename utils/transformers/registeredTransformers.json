@@ -1,4 +1,4 @@
 {
     "cvtColor": ["utils.transformers.Transform_cvtColor", "Transform_cvtColor"],
-    "stablizedTrack": ["utils.transformers.Transform_stablizedTrack", "Transform_stablizedTrack"]
+    "stabilizedTrack": ["utils.transformers.Transform_stablizedTrack", "Transform_stablizedTrack"]
 }
