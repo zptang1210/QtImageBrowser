@@ -4,16 +4,18 @@ from models.ImageCollectionVideoModel import ImageCollectionVideoModel
 from models.ImageCollectionPPMModel import ImageCollectionPPMModel
 from ImageBrowserWindow import Ui_MainWindow
 from ImageViewerSubWindow import ImageViewerSubWindow
-from utils.saveImageCollection import saveImageCollection
+from utils.SaveImageCollection import SaveImageCollection
 from ImageCollectionSaveDialog import ImageCollectionSaveDialog
 from ImageCollectionOpenDialog import ImageCollectionOpenDialog
-from PyQt5 import QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
         self.show()
+
+        self.threadpool = QtCore.QThreadPool()
         
         self.imageCollectionModels = {}
         self.openCollectionButton.clicked.connect(self.openCollectionButtonClicked)
@@ -124,13 +126,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             targetType = diag.getType()
 
             modelToSave = self.imageCollectionModels[item.path]
-            flag = saveImageCollection(modelToSave, savePath, targetType)
-            if flag:
-                self.createAndAddNewImageCollection(savePath, name, targetType)
-            else:
-                QtWidgets.QMessageBox.warning(self, 'Warning', 'Error occurs during saving.', QtWidgets.QMessageBox.Ok)
+            callback = lambda flag: self.saveFinishedCallback(savePath, name, targetType, flag)
+            SaveImageCollection.save(modelToSave, savePath, targetType, self.threadpool, callback)
 
     
+    def saveFinishedCallback(self, savePath, name, targetType, flag):
+        if flag:
+            QtWidgets.QMessageBox.Information(self, 'Information', 'Image collection saved.', QtWidgets.QMessageBox.Ok)
+            self.createAndAddNewImageCollection(savePath, name, targetType)
+        else:
+            QtWidgets.QMessageBox.warning(self, 'Warning', 'Error occurs during saving.', QtWidgets.QMessageBox.Ok)
+    
+
     def closeCollectionButtonClicked(self):
         item = self.treeWidget.selectedItems()
         if not item: return
