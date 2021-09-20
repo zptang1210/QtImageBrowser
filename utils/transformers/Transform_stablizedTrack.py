@@ -2,7 +2,11 @@ import argparse
 import numpy as np
 import cv2
 from utils.transformers.Transform_base import Transform_base
+from multiprocessing import Process, Queue
 
+def selectROI(queue, frame, flag):
+    bbox = cv2.selectROI(frame, flag)
+    queue.put(bbox)
 
 class Transform_stablizedTrack(Transform_base):
     command = 'stabilizedTrack'
@@ -57,7 +61,17 @@ class Transform_stablizedTrack(Transform_base):
 
         # Uncomment the line below to select a different bounding box
         frame_ = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-        bbox = cv2.selectROI(frame_, False)
+
+        # CAUTIOUS: Now the image browser supports multithreading. This makes the following line fail because opencv only allow window related functions to run on the main thread (on macos).
+        # Thus you need to use a new process to run window related functions!
+        # # bbox = cv2.selectROI(frame_, False)
+
+        queue = Queue()
+        p = Process(target=selectROI, args=(queue, frame_, False))
+        p.start()
+        p.join()
+        bbox = queue.get(True)
+        print(bbox)
 
         # Initialize tracker with first frame and bounding box
         ok = self.tracker.init(frame, bbox)
@@ -71,6 +85,7 @@ class Transform_stablizedTrack(Transform_base):
         try:
             idx = 1
             while True:
+                print('processing', idx)
                 if idx >= model.length(): break
 
                 # Read a new frame
@@ -129,7 +144,7 @@ class Transform_stablizedTrack(Transform_base):
             #     # Display FPS on frame
             #     cv2.putText(frame, "FPS : " + str(int(fps)), (100,50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50,170,50), 2);
                 # Display result
-                cv2.imshow("Tracking", np.concatenate((frame, flowviz), axis=1))
+                # cv2.imshow("Tracking", np.concatenate((frame, flowviz), axis=1)) #TODO
                 #cv2.imwrite(os.path.join('dst',"%06d.png"%(count)), frame)
 
                 frame_with_viz = np.concatenate((frame, flowviz), axis=1)

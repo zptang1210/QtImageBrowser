@@ -1,3 +1,5 @@
+from PyQt5 import QtCore
+from utils.TransformCodeParseAndRunThread import TransformCodeParseAndRunThread
 from models.ImageCollectionSubModel import ImageCollectionSubModel
 from utils.TransformCodeInterpreter import TransformCodeInterpreter
 from TransformDialog import TransformDialog
@@ -13,8 +15,11 @@ class ImageViewerWidget(QtWidgets.QWidget):
         self.setWindowTitle(model.name)
         self.model = model
         self.parent = parent
+        
+        self.transformDlg = None
+        self.threadpool = QtCore.QThreadPool()
 
-        self.parser = TransformCodeInterpreter()
+        # self.parser = TransformCodeInterpreter()
 
         self.toolbar = QtWidgets.QToolBar()
         # self.toolbar.setToolButtonStyle(Qt.ToolButtonIconOnly)
@@ -113,27 +118,52 @@ class ImageViewerWidget(QtWidgets.QWidget):
             else:
                 self.labelToggleActions[i].setChecked(False)
 
+    # # single thread implementation
+    # def transformActionTriggered(self):
+    #     dlg = TransformDialog(self)
+    #     succeeded = False
+    #     while True:
+    #         if dlg.exec_():
+    #             newCollectionName = dlg.nameLineEdit.text().strip()
+    #             code = dlg.transformCode.toPlainText()
+
+    #             newModel = self.parser.parseAndRun(code, self.model, newCollectionName)
+    #             if newModel is not None:
+    #                 succeeded = True
+    #                 break
+    #             else:
+    #                 QtWidgets.QMessageBox.warning(self, 'Warning', 'Failed to run the commands!', QtWidgets.QMessageBox.Ok)
+    #         else: 
+    #             break
+
+    #     if succeeded:
+    #         flag = self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + ' (temp collection)', type='folder', parentModel=self.model)
+    #         if flag:
+    #             QtWidgets.QMessageBox.information(self, 'Info', f'The new image collection {newModel.name} has been opened.', QtWidgets.QMessageBox.Ok)
+
     def transformActionTriggered(self):
-        dlg = TransformDialog(self)
-        succeeded = False
-        while True:
-            if dlg.exec_():
-                newCollectionName = dlg.nameLineEdit.text().strip()
-                code = dlg.transformCode.toPlainText()
+        if self.transformDlg is None:
+            self.transformDlg = TransformDialog(self)
 
-                newModel = self.parser.parseAndRun(code, self.model, newCollectionName)
-                if newModel is not None:
-                    succeeded = True
-                    break
-                else:
-                    QtWidgets.QMessageBox.warning(self, 'Warning', 'Failed to run the commands!', QtWidgets.QMessageBox.Ok)
-            else: 
-                break
+        if self.transformDlg.exec_():
+            newCollectionName = self.transformDlg.nameLineEdit.text().strip()
+            code = self.transformDlg.transformCode.toPlainText()
 
-        if succeeded:
+            TransformCodeParseAndRunThread.parseAndRun(code, self.model, newCollectionName, self.threadpool, self.transformFinishedCallback)
+        else:
+            self.transformDlg = None
+            return
+
+    def transformFinishedCallback(self, newModel):
+        if newModel is not None:
             flag = self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + ' (temp collection)', type='folder', parentModel=self.model)
             if flag:
                 QtWidgets.QMessageBox.information(self, 'Info', f'The new image collection {newModel.name} has been opened.', QtWidgets.QMessageBox.Ok)
+            self.transformDlg = None     
+        else:
+            QtWidgets.QMessageBox.warning(self, 'Warning', 'Failed to run the commands!', QtWidgets.QMessageBox.Ok)
+            self.transformAction.trigger()
+
 
     def getCurrentImgIdx(self):
         return self.slider.value()
