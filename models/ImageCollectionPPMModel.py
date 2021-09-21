@@ -9,7 +9,10 @@ class ImageCollectionPPMModel(ImageCollectionModel):
         self.name = name
         self.parentModel = parentModel
 
-        self.imgList = PPMProcessor.readSuperPPM(self.path)
+        try:
+            self.imgList = PPMProcessor.readSuperPPM(self.path)
+        except:
+            raise RuntimeError('Unable to load the ppm file.')
 
     def length(self):
         return len(self.imgList)

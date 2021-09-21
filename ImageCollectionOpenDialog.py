@@ -32,13 +32,13 @@ class ImageCollectionOpenDialog(ImageCollectionSelectionDialog):
 
         invalid = False
         if selectedType == ImageCollectionSelectionDialog.availTypes[0]:
-            if not os.path.exists(path):
+            if not self.pathExists(path):
                 invalid = True
         elif selectedType == ImageCollectionSelectionDialog.availTypes[1]:
-            if (not os.path.exists(path)) or (os.path.splitext(path)[1].lower() not in ('.mp4', '.avi')):
+            if (not self.pathExists(path)) or (os.path.splitext(path)[1].lower() not in ('.mp4', '.avi')):
                 invalid = True
         elif selectedType == ImageCollectionSelectionDialog.availTypes[2]:
-            if (not os.path.exists(path)) or (os.path.splitext(path)[1].lower() != '.ppm'):
+            if (not self.pathExists(path)) or (os.path.splitext(path)[1].lower() != '.ppm'):
                 invalid = True
         else:
             invalid = True
@@ -51,6 +51,13 @@ class ImageCollectionOpenDialog(ImageCollectionSelectionDialog):
             self.accept()
         else:
             QtWidgets.QMessageBox.warning(self, 'Warning', 'Invalid path.', QtWidgets.QMessageBox.Ok)
+
+    def pathExists(self, path):
+        isServerPath = (':' in path)
+        if isServerPath:
+            return True #TODO
+        else:
+            return os.path.exists(path)
 
 
 if __name__ == '__main__':

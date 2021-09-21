@@ -1,3 +1,4 @@
+from models.ImageCollectionCloudModel import ImageCollectionCloudModel
 import sys, os
 from models.ImageCollectionFolderModel import ImageCollectionFolderModel
 from models.ImageCollectionVideoModel import ImageCollectionVideoModel
@@ -28,6 +29,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.closeCollectionButton.clicked.connect(self.closeCollectionButtonClicked)
 
 
+    def isServerPath(self, path):
+        return ':' in path
+
+
     def openCollectionButtonClicked(self):
         diag = ImageCollectionOpenDialog(self)
         if diag.exec_():
@@ -50,20 +55,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.imageCollectionModels.pop(path)
                 return False
         else:
-            QtWidgets.QMessageBox.information(self, 'Info', 'This image collection has already been opened.', QtWidgets.QMessageBox.Ok)
+            QtWidgets.QMessageBox.information(self, 'Info', 'This image collection has already been opened or Error occurs during openning the image collection.', QtWidgets.QMessageBox.Ok)
             return False
 
 
     def createNewImageCollectionModel(self, path, name, type, parentModel=None):
         assert type in ('folder', 'video', 'ppm')
         modelClassDict = {'folder': ImageCollectionFolderModel, 'video': ImageCollectionVideoModel,'ppm': ImageCollectionPPMModel}
+
         if path not in self.imageCollectionModels.keys():
-            modelClass = modelClassDict[type]
-            model = modelClass(path, name, parentModel=parentModel)
-            self.imageCollectionModels[path] = model
-            return True, model
+            try:
+                if self.isServerPath(path):
+                    model = ImageCollectionCloudModel(path, name, type, parentModel=parentModel)
+                else:
+                    modelClass = modelClassDict[type]
+                    model = modelClass(path, name, parentModel=parentModel)
+            except:
+                return False, None
+            else:
+                self.imageCollectionModels[path] = model
+                return True, model               
         else:
-            return False, None
+            return False, None  
 
 
     def addCollectionItem(self, model):

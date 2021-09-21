@@ -13,7 +13,10 @@ class ImageCollectionVideoModel(ImageCollectionModel):
         self.name = name
         self.parentModel = parentModel
 
-        self.vr = VideoReader(self.path, ctx=cpu(0))
+        try:
+            self.vr = VideoReader(self.path, ctx=cpu(0))
+        except:
+            raise RuntimeError('Unable to load the video file.')
 
     def length(self):
         return len(self.vr)
