@@ -48,7 +48,9 @@ class ImageCollectionFolderModel(ImageCollectionModel):
     @staticmethod
     def saveModel(modelToSave, savePath):
         if not os.path.exists(savePath):
-            os.makedirs(savePath) 
+            os.makedirs(savePath)
+        else:
+            return False
         
         for idx in range(modelToSave.length()):
             img_np, name = modelToSave.get(idx)

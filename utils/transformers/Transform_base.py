@@ -1,6 +1,5 @@
 import os
 import time
-import shutil
 import traceback
 from abc import abstractmethod
 from PIL import Image
@@ -37,8 +36,9 @@ class Transform_base:
 
         try:
             if os.path.exists(savePath):
-                shutil.rmtree(savePath)
-            os.makedirs(savePath)
+                # shutil.rmtree(savePath) # should avoid this since it may replace existing opened files
+                return None
+            else: os.makedirs(savePath)
             for img_np, img_name in self.processImageCollection(model, self.args):
                 img_pil = Image.fromarray(img_np)
                 img_pil.save(os.path.join(savePath, img_name+'.jpg'))

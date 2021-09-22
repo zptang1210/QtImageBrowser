@@ -41,6 +41,8 @@ class ImageCollectionVideoModel(ImageCollectionModel):
 
     @staticmethod
     def saveModel(modelToSave, savePath, fps=30):
+        if os.path.exists(savePath): return False
+
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         img_size = modelToSave.getImg(0).shape
         size = img_size[:2]

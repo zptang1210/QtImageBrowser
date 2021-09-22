@@ -38,6 +38,8 @@ class ImageCollectionPPMModel(ImageCollectionModel):
 
     @staticmethod
     def saveModel(modelToSave, savePath, numPerRow=10):
+        if os.path.exists(savePath): return False 
+
         img_list = []
         for idx in range(modelToSave.length()):
             img_np = modelToSave.getImg(idx)
