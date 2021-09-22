@@ -4,3 +4,4 @@ testData/
 .DS_Store
 .idea/
 tmp/
+resources/deprecated/

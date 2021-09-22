@@ -1,3 +1,4 @@
+from models.ImageCollectionCloudModel import ImageCollectionCloudModel
 from utils.TransformCodeInterpreter import TransformCodeInterpreter
 from models.ImageCollectionModel import ImageCollectionModel
 from PyQt5 import QtCore
@@ -19,7 +20,11 @@ class TransformCodeParseAndRunThread(QtCore.QRunnable):
 
     @QtCore.pyqtSlot()
     def run(self):
-        newModel = self.parser.parseAndRun(self.code, self.model, self.newCollectionName)
+        if isinstance(self.model, ImageCollectionCloudModel):
+            newModel = self.parser.parseAndRunRemotely(self.code, self.model, self.newCollectionName)
+        else:
+            newModel = self.parser.parseAndRun(self.code, self.model, self.newCollectionName)
+            
         if newModel:
             self.signals.finished.emit(newModel)
         else:

@@ -21,7 +21,7 @@ class ImageCollectionSaveDialog(ImageCollectionSelectionDialog):
     def buttonOKClicked(self):
         name = self.getName()
         selectedType = self.getType()
-        if name == '' or (selectedType == ImageCollectionSelectionDialog.availTypes[2] and not name.endswith('.ppm')) or \
+        if name == '' or ''.join(name.split()) != name or (selectedType == ImageCollectionSelectionDialog.availTypes[2] and not name.endswith('.ppm')) or \
             (selectedType == ImageCollectionSelectionDialog.availTypes[1] and not (name.endswith('.mp4') or name.endswith('.avi'))):
             QtWidgets.QMessageBox.warning(self, 'Warning', 'Invalid name.', QtWidgets.QMessageBox.Ok)
         else:

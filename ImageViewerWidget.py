@@ -15,6 +15,8 @@ class ImageViewerWidget(QtWidgets.QWidget):
         self.setWindowTitle(model.name)
         self.model = model
         self.parent = parent
+
+        self.openedLabelSubWindows = []
         
         self.transformDlg = None
         self.threadpool = QtCore.QThreadPool()
@@ -156,7 +158,7 @@ class ImageViewerWidget(QtWidgets.QWidget):
 
     def transformFinishedCallback(self, newModel):
         if newModel is not None:
-            flag = self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + ' (temp collection)', type='folder', parentModel=self.model)
+            flag = self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + '_temp', type='folder', parentModel=self.model)
             if flag:
                 QtWidgets.QMessageBox.information(self, 'Info', f'The new image collection {newModel.name} has been opened.', QtWidgets.QMessageBox.Ok)
             self.transformDlg = None     
@@ -191,6 +193,7 @@ class ImageViewerWidget(QtWidgets.QWidget):
         subModel = ImageCollectionSubModel('label_' + str(idx), list(self.labelList[idx]), self.model)
         import ImageLabelViewerSubWindow
         labelWindow = ImageLabelViewerSubWindow.ImageLabelViewerSubWindow(subModel, self)
+        self.openedLabelSubWindows.append(labelWindow)
         self.parent.parent.mdiArea.addSubWindow(labelWindow)
         self.setLabelActionEnabled(False)
         labelWindow.show()

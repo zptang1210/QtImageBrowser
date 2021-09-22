@@ -55,7 +55,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.imageCollectionModels.pop(path)
                 return False
         else:
-            QtWidgets.QMessageBox.information(self, 'Info', 'This image collection has already been opened or Error occurs during openning the image collection.', QtWidgets.QMessageBox.Ok)
+            QtWidgets.QMessageBox.information(self, 'Info', 'Error occurs during openning the image collection. (e.g. this image collection has already been opened.)', QtWidgets.QMessageBox.Ok)
             return False
 
 
@@ -145,7 +145,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
     def saveFinishedCallback(self, savePath, name, targetType, flag):
         if flag:
-            QtWidgets.QMessageBox.Information(self, 'Information', 'Image collection saved.', QtWidgets.QMessageBox.Ok)
+            QtWidgets.QMessageBox.information(self, 'Information', 'Image collection saved.', QtWidgets.QMessageBox.Ok)
             self.createAndAddNewImageCollection(savePath, name, targetType)
         else:
             QtWidgets.QMessageBox.warning(self, 'Warning', 'Error occurs during saving.', QtWidgets.QMessageBox.Ok)
@@ -160,9 +160,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if item.path in self.imageViewerSubWindows.keys():
             for idx in range(item.childCount()):
                 subItem = item.child(idx)
+                self.imageViewerSubWindows[subItem.path].removeAffiliatedWindows()
                 self.mdiArea.removeSubWindow(self.imageViewerSubWindows[subItem.path])
                 self.imageViewerSubWindows.pop(subItem.path)
                 
+            self.imageViewerSubWindows[item.path].removeAffiliatedWindows()
             self.mdiArea.removeSubWindow(self.imageViewerSubWindows[item.path])
             self.imageViewerSubWindows.pop(item.path)
 

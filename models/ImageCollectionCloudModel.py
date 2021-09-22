@@ -7,11 +7,13 @@ from getpass import getpass
 from PyQt5 import QtCore
 from pexpect.exceptions import TIMEOUT, EOF
 from models.ImageCollectionModel import ImageCollectionModel
+import utils.PasswdManager as PasswdManager
+import pexpect
 
 class ImageCollectionCloudModel(ImageCollectionModel):
     DEFAULT_LOCAL_ROOT_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'tmp'))
 
-    def __init__(self, path, name, type, localPath=None, parentModel=None):
+    def __init__(self, path, name, type, localPath=None, preload=True, parentModel=None):
         super().__init__()
         self.path = path
         self.name = name
@@ -27,19 +29,24 @@ class ImageCollectionCloudModel(ImageCollectionModel):
 
         self.serverAddr = self.path.split(':')[0]
         
-        flag = self.load(self.path, self.localPath)
-        if flag == False:
-            raise RuntimeError('Unable to load the image collection from the server.')
+        if preload:
+            flag = self.load(self.path, self.localPath)
+            self.loaded = True
+            if flag == False:
+                raise RuntimeError('Unable to load the image collection from the server.')
         
-        self.model = self.getModel()
+            self.model = self.getModel()
+        else:
+            self.loaded = False
+            self.model = None
 
 
     def load(self, serverPath, localPath):
-        import pexpect
         if self.type == 'folder' and not serverPath.endswith('/'):
             serverPath = serverPath + '/'
 
         cmd = f'rsync -a --delete {serverPath} {localPath}'      #rsync -av --delete xxx@gypsum.cs.umass.edu:~/testData /Users/xxx/Desktop/tmp
+        print('rsync cmd: ', cmd)
         child = pexpect.spawn(cmd)
         
         i = child.expect(["password", EOF, TIMEOUT], timeout=30)
@@ -48,21 +55,26 @@ class ImageCollectionCloudModel(ImageCollectionModel):
             print('Unexpected situation')
             return False
 
-        passwd = getpass()
+        passwd = PasswdManager.passwdManager.getPass()
         child.sendline(passwd)
         i = child.expect(["Permission denied", 'failed', 'error', EOF, TIMEOUT], timeout=200)
         # print(i, child.before, child.after)
         if i == 0:
-            print('Permission denied')
+            print('rsync Permission denied')
+            PasswdManager.passwdManager.currentPasswdIsInvalid()
+            self.loaded = False
             return False
         elif i == 3:
-            print('Ok')
+            print('rsync Ok')
+            self.loaded = True
             return True
         elif i == 4:
-            print('Timeout')
+            print('rsync Timeout')
+            self.loaded = False
             return False
         else:
-            print('Error')
+            print('rsync Error')
+            self.loaded = False
             return False
 
         # import paramiko
@@ -83,18 +95,22 @@ class ImageCollectionCloudModel(ImageCollectionModel):
         return model
         
     def length(self):
+        assert self.loaded
         return self.model.length()
     
     def getImg(self, idx):
+        assert self.loaded
         return self.model.getImg(idx)
     
     def getImgName(self, idx):
+        assert self.loaded
         return self.model.getImgName(idx)
 
     def getRootPath(self):
         return self.path
 
     def getImgInfo(self, idx):
+        assert self.loaded
         rootPath = self.getRootPath()
         idx = idx
 
@@ -105,6 +121,10 @@ class ImageCollectionCloudModel(ImageCollectionModel):
             path = rootPath + f':{idx}'
         
         return {'idx': idx, 'path': path, 'rootPath': rootPath}
+
+    @staticmethod
+    def saveModel(modelToSave, savePath):
+        raise NotImplemented()
 
 
 if __name__ == '__main__':

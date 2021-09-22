@@ -21,6 +21,8 @@ class SaveImageCollection(QtCore.QRunnable):
     @QtCore.pyqtSlot()
     def run(self):
         modelClassDict = {'folder': ImageCollectionFolderModel, 'video': ImageCollectionVideoModel,'ppm': ImageCollectionPPMModel}
+        # TODO: check if the path is to the server, if yes, save model to a temp place and then upload it.
+        # If modelToSave is a cloud type, and the path is also a cloud path, copy directly on the server side.
         flag = modelClassDict[self.targetType].saveModel(self.modelToSave, self.savePath)
         self.signals.finished.emit(flag)
 

@@ -46,16 +46,18 @@ class ImageCollectionOpenDialog(ImageCollectionSelectionDialog):
         name = self.getName()
         if name == '':
             self.setName(os.path.basename(self.getPath()))
+        elif ''.join(name.split()) != name: # contains space char
+            invalid = True
 
         if not invalid:
             self.accept()
         else:
-            QtWidgets.QMessageBox.warning(self, 'Warning', 'Invalid path.', QtWidgets.QMessageBox.Ok)
+            QtWidgets.QMessageBox.warning(self, 'Warning', 'Invalid name or path.', QtWidgets.QMessageBox.Ok)
 
     def pathExists(self, path):
         isServerPath = (':' in path)
         if isServerPath:
-            return True #TODO
+            return True #TODO: a more comprehensive check
         else:
             return os.path.exists(path)
 

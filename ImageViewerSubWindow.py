@@ -7,7 +7,14 @@ class ImageViewerSubWindow(QtWidgets.QMdiSubWindow):
         super().__init__(parent)
         self.parent = parent
         self.model = model
-        self.setWidget(ImageViewerWidget(model, self))
+        self.widget = ImageViewerWidget(model, self)
+        self.setWidget(self.widget)
 
     def closeEvent(self, event):
+        self.removeAffiliatedWindows()
         self.parent.imageViewerSubWindows.pop(self.model.path)
+
+    def removeAffiliatedWindows(self):
+        for win in self.widget.openedLabelSubWindows:
+            self.parent.mdiArea.removeSubWindow(win)
+        self.widget.openedLabelSubWindows = []

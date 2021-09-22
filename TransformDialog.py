@@ -9,7 +9,7 @@ class TransformDialog(QtWidgets.QDialog):
         QBtn = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
 
         self.buttonBox = QtWidgets.QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.accepted.connect(self.buttonOkClicked)
         self.buttonBox.rejected.connect(self.reject)
 
 
@@ -27,3 +27,12 @@ class TransformDialog(QtWidgets.QDialog):
 
         self.layout.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
         self.setLayout(self.layout)
+
+    def buttonOkClicked(self):
+        name = self.nameLineEdit.text().strip()
+        code = self.transformCode.toPlainText().strip()
+        if ''.join(name.split()) == name and len(code) != 0: # no blank character or script
+            self.nameLineEdit.setText(name)
+            self.accept()
+        else:
+            QtWidgets.QMessageBox.warning(self, 'Warning', 'Invalid name or script!', QtWidgets.QMessageBox.Ok)
