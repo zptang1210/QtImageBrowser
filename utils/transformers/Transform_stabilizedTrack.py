@@ -8,7 +8,7 @@ def selectROI(queue, frame, flag):
     bbox = cv2.selectROI(frame, flag)
     queue.put(bbox)
 
-class Transform_stablizedTrack(Transform_base):
+class Transform_stabilizedTrack(Transform_base):
     command = 'stabilizedTrack'
 
     def __init__(self):
