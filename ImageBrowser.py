@@ -159,11 +159,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if item.path in self.imageViewerSubWindows.keys():
             for idx in range(item.childCount()):
                 subItem = item.child(idx)
-                print('before_', subItem.path, self.imageViewerSubWindows)
-                self.imageViewerSubWindows[subItem.path].removeAffiliatedWindows() # BUG: open a collection -> add subcollection -> close the window for sub collection -> close the major collection, need to check if the existence of the sub collection
-                print('after_', subItem.path, self.imageViewerSubWindows)
-                self.mdiArea.removeSubWindow(self.imageViewerSubWindows[subItem.path])
-                self.imageViewerSubWindows.pop(subItem.path)
+                if subItem.path in self.imageViewerSubWindows:
+                    self.imageViewerSubWindows[subItem.path].removeAffiliatedWindows()
+                    self.mdiArea.removeSubWindow(self.imageViewerSubWindows[subItem.path])
+                    self.imageViewerSubWindows.pop(subItem.path)
                 
             self.imageViewerSubWindows[item.path].removeAffiliatedWindows()
             self.mdiArea.removeSubWindow(self.imageViewerSubWindows[item.path])
