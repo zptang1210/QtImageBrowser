@@ -41,7 +41,7 @@ class RemoteServer:
             self.connected = False
             return True
 
-    def runTemplateScript(self, replace, expectRe):
+    def runTemplateScript(self, replace, expectRe, timeout=500):
         if self.script is None or self.connected == False or self.server is None:
             print('failed the initial check for script run.')
             return None
@@ -62,9 +62,9 @@ class RemoteServer:
                 
                 self.server.sendline(line)
                 if not keyLine:
-                    self.server.prompt()
+                    self.server.prompt(timeout=(timeout//2))
                 else:
-                    self.server.expect(expectRe)
+                    self.server.expect(expectRe, timeout=timeout)
                     result = self.server.after.decode()
                 # print('debug info:', self.server.before, self.server.after)
         except Exception as e:
