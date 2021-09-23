@@ -3,6 +3,7 @@
 2. git clone the repo and put it to the processor_path on your server
 3. create tmp/scripts folder on your processor_path
 4. write your own template_path
+
 You can also create multiple configurations, remember to change registeredServerConfig.json to your configuration file.
 
 # Run on your local machine:

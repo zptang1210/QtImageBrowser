@@ -49,6 +49,7 @@ def runScript(rawCode, model, newCollectionName, rootSavePath):
     return model
 
 def runTransform():
+    os.chdir(os.path.dirname(__file__))
     args = argsParser()
 
     flag = checkArgs(args)

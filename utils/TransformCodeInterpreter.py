@@ -89,7 +89,9 @@ class TransformCodeInterpreter:
         replace = {'[GENSCRIPT]': genscriptCode, '[RUN]': runCode}
         expectRe = 'transform_finished (\d) (.*) (.*)'
         result = server.runTemplateScript(replace, expectRe)
-        print(result)
+        print('transform result:', result)
+        if result is None:
+            return None
 
         pattern = re.compile(expectRe)
         m = pattern.match(result)
