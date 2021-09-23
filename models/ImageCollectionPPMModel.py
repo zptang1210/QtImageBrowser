@@ -1,11 +1,13 @@
 import os
+from utils.pathUtils import normalizePath
 from models.ImageCollectionModel import ImageCollectionModel
 from utils import PPMProcessor
 
 class ImageCollectionPPMModel(ImageCollectionModel):
     def __init__(self, path, name, parentModel=None):
         super().__init__()
-        self.path = os.path.normpath(path)
+        assert path == normalizePath(path)
+        self.path = path
         self.name = name
         self.parentModel = parentModel
 
@@ -28,10 +30,10 @@ class ImageCollectionPPMModel(ImageCollectionModel):
         return ('%06d' % idx)
 
     def getRootPath(self):
-        return os.path.normpath(os.path.dirname(self.path))
+        return normalizePath(os.path.dirname(self.path))
 
     def getImgInfo(self, idx):
-        path = os.path.normpath(self.path) + f':{idx}'
+        path = self.path + f':{idx}'
         rootPath = self.getRootPath()
         idx = idx
         return {'idx': idx, 'path': path, 'rootPath': rootPath}

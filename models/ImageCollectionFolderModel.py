@@ -1,5 +1,6 @@
 import os
 from glob import glob
+from utils.pathUtils import normalizePath
 from PIL import Image
 import numpy as np
 from models.ImageCollectionModel import ImageCollectionModel
@@ -7,7 +8,8 @@ from models.ImageCollectionModel import ImageCollectionModel
 class ImageCollectionFolderModel(ImageCollectionModel):
     def __init__(self, path, name, parentModel=None):
         super().__init__()
-        self.path = os.path.normpath(path)
+        assert path == normalizePath(path)
+        self.path = path
         self.name = name
         self.parentModel = parentModel
 
@@ -18,7 +20,7 @@ class ImageCollectionFolderModel(ImageCollectionModel):
             glob(os.path.join(self.path, '*.tif')) + \
             glob(os.path.join(self.path, '*.bmp'))
 
-        self.imgList = list(map(os.path.normpath, self.imgList))
+        self.imgList = list(map(normalizePath, self.imgList))
         self.imgList = sorted(self.imgList)
 
     def length(self):
@@ -37,10 +39,10 @@ class ImageCollectionFolderModel(ImageCollectionModel):
         return os.path.splitext(os.path.basename(self.imgList[idx]))[0]
 
     def getRootPath(self):
-        return os.path.normpath(self.path)
+        return self.path
 
     def getImgInfo(self, idx):
-        path = os.path.normpath(self.imgList[idx])
+        path = self.imgList[idx]
         rootPath = self.getRootPath()
         idx = idx
         return {'idx': idx, 'path': path, 'rootPath': rootPath}

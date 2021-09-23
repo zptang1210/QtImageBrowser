@@ -1,15 +1,16 @@
 import os
+from utils.pathUtils import normalizePath
 from models.ImageCollectionModel import ImageCollectionModel
 from utils.rsyncWrapper import rsync
 from configs.availTypesConfig import availTypes
 from configs.availTypesConfig import modelClassDict
 
 class ImageCollectionCloudModel(ImageCollectionModel):
-    DEFAULT_LOCAL_ROOT_PATH = os.path.normpath(os.path.join('.', 'tmp'))
+    DEFAULT_LOCAL_ROOT_PATH = normalizePath(os.path.join('.', 'tmp'))
 
     def __init__(self, path, name, type, localPath=None, preload=True, parentModel=None):
         super().__init__()
-        self.path = path
+        self.path = path # server path
         self.name = name
         self.type = type
         assert self.type in availTypes
@@ -19,7 +20,7 @@ class ImageCollectionCloudModel(ImageCollectionModel):
             self.localPath = os.path.join(ImageCollectionCloudModel.DEFAULT_LOCAL_ROOT_PATH, name)
         else:
             self.localPath = localPath
-        self.localPath = os.path.normpath(self.localPath)
+        self.localPath = normalizePath(self.localPath)
 
         self.serverAddr = self.path.split(':')[0]
         

@@ -21,8 +21,6 @@ class ImageViewerWidget(QtWidgets.QWidget):
         self.transformDlg = None
         self.threadpool = QtCore.QThreadPool()
 
-        # self.parser = TransformCodeInterpreter()
-
         self.toolbar = QtWidgets.QToolBar()
         # self.toolbar.setToolButtonStyle(Qt.ToolButtonIconOnly)
 
@@ -119,29 +117,6 @@ class ImageViewerWidget(QtWidgets.QWidget):
                 self.labelToggleActions[i].setChecked(True)
             else:
                 self.labelToggleActions[i].setChecked(False)
-
-    # # single thread implementation
-    # def transformActionTriggered(self):
-    #     dlg = TransformDialog(self)
-    #     succeeded = False
-    #     while True:
-    #         if dlg.exec_():
-    #             newCollectionName = dlg.nameLineEdit.text().strip()
-    #             code = dlg.transformCode.toPlainText()
-
-    #             newModel = self.parser.parseAndRun(code, self.model, newCollectionName)
-    #             if newModel is not None:
-    #                 succeeded = True
-    #                 break
-    #             else:
-    #                 QtWidgets.QMessageBox.warning(self, 'Warning', 'Failed to run the commands!', QtWidgets.QMessageBox.Ok)
-    #         else: 
-    #             break
-
-    #     if succeeded:
-    #         flag = self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + ' (temp collection)', type='folder', parentModel=self.model)
-    #         if flag:
-    #             QtWidgets.QMessageBox.information(self, 'Info', f'The new image collection {newModel.name} has been opened.', QtWidgets.QMessageBox.Ok)
 
     def transformActionTriggered(self):
         if self.transformDlg is None:

@@ -1,4 +1,5 @@
 import os
+from utils.pathUtils import isServerPath, normalizePath
 from PyQt5 import QtWidgets
 from configs.availTypesConfig import availTypes
 
@@ -47,7 +48,8 @@ class ImageCollectionSelectionDialog(QtWidgets.QDialog):
         pass
 
     def getPath(self):
-        return os.path.normpath(self.pathLineEdit.text())
+        path = self.pathLineEdit.text().strip()
+        return normalizePath(path)
 
     def getName(self):
         return self.nameLineEdit.text().strip()

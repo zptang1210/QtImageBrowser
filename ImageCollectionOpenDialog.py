@@ -1,8 +1,7 @@
 import os
 from PyQt5 import QtWidgets
 from ImageCollectionSelectionDialog import ImageCollectionSelectionDialog
-from utils.isServerPath import isServerPath
-from configs.availTypesConfig import availTypes
+from utils.pathUtils import isServerPath, normalizePath
 
 class ImageCollectionOpenDialog(ImageCollectionSelectionDialog):
 
@@ -12,17 +11,18 @@ class ImageCollectionOpenDialog(ImageCollectionSelectionDialog):
     # override
     def fileDialogButtonClicked(self):
         selectedType = self.typeComboBox.currentText()
-        if selectedType == availTypes[0]:
+        if selectedType == 'folder':
             path = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Image Folder', '')
-        elif selectedType == availTypes[1]:
+        elif selectedType == 'video':
             path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '', 'Videos (*.mp4 *.avi)')
-        elif selectedType == availTypes[2]:
+        elif selectedType == 'ppm':
             path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '', 'PPM Image (*.ppm)')
         else:
             path = None
+            raise ValueError('invalid selected type.')
 
         if path:
-            path = os.path.normpath(path)
+            path = normalizePath(path)
             self.pathLineEdit.setText(path)
         else:
             self.pathLineEdit.setText(None)
@@ -33,17 +33,18 @@ class ImageCollectionOpenDialog(ImageCollectionSelectionDialog):
         path = self.getPath()
 
         invalid = False
-        if selectedType == availTypes[0]:
+        if selectedType == 'folder':
             if not self.pathExists(path):
                 invalid = True
-        elif selectedType == availTypes[1]:
+        elif selectedType == 'video':
             if (not self.pathExists(path)) or (os.path.splitext(path)[1].lower() not in ('.mp4', '.avi')):
                 invalid = True
-        elif selectedType == availTypes[2]:
+        elif selectedType == 'ppm':
             if (not self.pathExists(path)) or (os.path.splitext(path)[1].lower() != '.ppm'):
                 invalid = True
         else:
             invalid = True
+            raise ValueError('invalid selected type.')
 
         name = self.getName()
         if name == '':

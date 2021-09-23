@@ -1,9 +1,7 @@
 import os
-from utils.isServerPath import isServerPath
+from utils.pathUtils import isServerPath, normalizePath
 from PyQt5 import QtWidgets
 from ImageCollectionSelectionDialog import ImageCollectionSelectionDialog
-from configs.availTypesConfig import availTypes
-
 
 class ImageCollectionSaveDialog(ImageCollectionSelectionDialog):
     
@@ -14,7 +12,7 @@ class ImageCollectionSaveDialog(ImageCollectionSelectionDialog):
     def fileDialogButtonClicked(self):
         path = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Image Folder', '')
         if path:
-            path = os.path.normpath(path)
+            path = normalizePath(path)
             self.pathLineEdit.setText(path)
         else:
             self.pathLineEdit.setText(None)
@@ -23,8 +21,8 @@ class ImageCollectionSaveDialog(ImageCollectionSelectionDialog):
     def buttonOKClicked(self):
         name = self.getName()
         selectedType = self.getType()
-        if name == '' or ''.join(name.split()) != name or (selectedType == availTypes[2] and not name.endswith('.ppm')) or \
-            (selectedType == availTypes[1] and not (name.endswith('.mp4') or name.endswith('.avi'))):
+        if name == '' or ''.join(name.split()) != name or (selectedType == 'ppm' and not name.endswith('.ppm')) or \
+            (selectedType == 'video' and not (name.endswith('.mp4') or name.endswith('.avi'))):
             QtWidgets.QMessageBox.warning(self, 'Warning', 'Invalid name.', QtWidgets.QMessageBox.Ok)
         else:
             path = self.getPath()

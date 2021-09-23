@@ -3,7 +3,7 @@ from abc import abstractmethod
 
 class ImageCollectionModel:
     def __init__(self):
-        self.path = None
+        self.path = None # path must pass this check: path == normalizePath(path)
         self.name = None
         self.parentModel = None
 

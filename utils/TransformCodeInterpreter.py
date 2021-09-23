@@ -3,6 +3,7 @@ import time
 import json
 import importlib
 import re
+from utils.pathUtils import normalizePath
 from utils.RemoteServer import RemoteServer
 from utils.strToRaw import str_to_raw
 from models.ImageCollectionCloudModel import ImageCollectionCloudModel
@@ -49,11 +50,12 @@ class TransformCodeInterpreter:
         return modulePath, className
 
     def run(self, code, model, newCollectionName, rootSavePath=None):
-        if len(code) == 0: return None
         if rootSavePath is None:
-            # rootSavePath = os.path.join(model.getRootPath(), 'transform')
-            rootSavePath = os.path.abspath(os.path.normpath(os.path.join('.', 'tmp')))
-            print('rootSavePath', rootSavePath)
+            rootSavePath = os.path.join('.', 'tmp')
+        rootSavePath = normalizePath(rootSavePath)
+
+        if len(code) == 0: return None # avoid empty script
+
         for i, (modulePath, className, argsList) in enumerate(code):
             module = importlib.import_module(modulePath)
             classMeta = getattr(module, className)
@@ -66,7 +68,7 @@ class TransformCodeInterpreter:
         
         return model
 
-    def parseAndRunRemotely(self, rawCode, model, newCollectionName, rootSavePath=None):
+    def parseAndRunRemotely(self, rawCode, model, newCollectionName):
         server = RemoteServer(self.serverConfig['config_file'])
         flag = server.login()
         if not flag:

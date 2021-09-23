@@ -2,6 +2,7 @@ import os
 import time
 import traceback
 from abc import abstractmethod
+from utils.pathUtils import normalizePath
 from PIL import Image
 from models.ImageCollectionFolderModel import ImageCollectionFolderModel
 
@@ -21,7 +22,7 @@ class Transform_base:
 
     def run(self, model, argsList, rootSavePath, saveName=None):
         if saveName is None: saveName = 'tmp_' + str(time.time())
-        savePath = os.path.join(rootSavePath, saveName)
+        savePath = normalizePath(os.path.join(rootSavePath, saveName))
 
         try:
             self.argParser = self.getArgParser()

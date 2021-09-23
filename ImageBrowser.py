@@ -7,7 +7,7 @@ from ImageViewerSubWindow import ImageViewerSubWindow
 from utils.SaveImageCollection import SaveImageCollection
 from ImageCollectionSaveDialog import ImageCollectionSaveDialog
 from ImageCollectionOpenDialog import ImageCollectionOpenDialog
-from utils.isServerPath import isServerPath
+from utils.pathUtils import isServerPath, normalizePath
 from configs.availTypesConfig import availTypes
 from configs.availTypesConfig import modelClassDict
 
@@ -44,12 +44,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         flag, model = self.createNewImageCollectionModel(path, name, type, parentModel=parentModel)
         if flag:
             # insert a new item into QListWidget
-            if self.imageCollectionModels[path].length() > 0:
+            if self.imageCollectionModels[model.path].length() > 0:
                 self.addCollectionItem(model)
                 return True
             else:
                 QtWidgets.QMessageBox.information(self, 'Info', 'There is no image in this image collection.', QtWidgets.QMessageBox.Ok)
-                self.imageCollectionModels.pop(path)
+                self.imageCollectionModels.pop(model.path)
                 return False
         else:
             QtWidgets.QMessageBox.information(self, 'Info', 'Error occurs during openning the image collection. (e.g. this image collection has already been opened.)', QtWidgets.QMessageBox.Ok)
@@ -135,7 +135,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if diag.exec_():
             path = diag.getPath()
             name = diag.getName()
-            savePath = os.path.join(path, name)
+            savePath = normalizePath(os.path.join(path, name))
             targetType = diag.getType()
             
             callback = lambda flag: self.saveFinishedCallback(savePath, name, targetType, flag)

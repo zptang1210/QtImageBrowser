@@ -1,6 +1,7 @@
 import os, sys
 import time
 import argparse
+from utils.pathUtils import normalizePath
 from utils.TransformCodeInterpreter import TransformCodeInterpreter
 from configs.availTypesConfig import availTypes
 from configs.availTypesConfig import modelClassDict
@@ -18,8 +19,8 @@ def argsParser():
     return args
 
 def checkArgs(args):
-    args.model_path = os.path.expanduser(args.model_path)
-    args.script_file = os.path.expanduser(args.script_file)
+    args.model_path = normalizePath(os.path.expanduser(args.model_path))
+    args.script_file = normalizePath(os.path.expanduser(args.script_file))
     
     if not os.path.exists(args.model_path):
         print('model_path not exists', file=sys.stderr)
@@ -67,7 +68,7 @@ def runTransform():
         print('failed to read the script', file=sys.stderr)
         return False, None, None
 
-    rootSavePath = os.path.normpath(os.path.join(os.path.dirname(__file__), 'tmp'))
+    rootSavePath = normalizePath(os.path.join(os.path.dirname(__file__), 'tmp'))
     model = runScript(rawCode, model, args.result_name, rootSavePath)
     if model is None:
         print('failed to run the script', file=sys.stderr)

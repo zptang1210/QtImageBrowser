@@ -1,6 +1,6 @@
 import os
 from PyQt5 import QtCore
-from utils.isServerPath import isServerPath
+from utils.pathUtils import isServerPath
 from utils.rsyncWrapper import rsync
 from configs.availTypesConfig import availTypes
 from configs.availTypesConfig import modelClassDict
