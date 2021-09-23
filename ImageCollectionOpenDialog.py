@@ -1,6 +1,7 @@
 import os
 from PyQt5 import QtWidgets
 from ImageCollectionSelectionDialog import ImageCollectionSelectionDialog
+from utils.isServerPath import isServerPath
 
 class ImageCollectionOpenDialog(ImageCollectionSelectionDialog):
 
@@ -55,9 +56,8 @@ class ImageCollectionOpenDialog(ImageCollectionSelectionDialog):
             QtWidgets.QMessageBox.warning(self, 'Warning', 'Invalid name or path.', QtWidgets.QMessageBox.Ok)
 
     def pathExists(self, path):
-        isServerPath = (':' in path)
-        if isServerPath:
-            return True #TODO: a more comprehensive check
+        if isServerPath(path):
+            return True 
         else:
             return os.path.exists(path)
 

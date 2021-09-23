@@ -9,6 +9,7 @@ from utils.SaveImageCollection import SaveImageCollection
 from ImageCollectionSaveDialog import ImageCollectionSaveDialog
 from ImageCollectionOpenDialog import ImageCollectionOpenDialog
 from PyQt5 import QtCore, QtWidgets
+from utils.isServerPath import isServerPath
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -27,10 +28,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.saveCollectionButton.clicked.connect(self.saveCollectionButtonClicked)
 
         self.closeCollectionButton.clicked.connect(self.closeCollectionButtonClicked)
-
-
-    def isServerPath(self, path):
-        return ':' in path
 
 
     def openCollectionButtonClicked(self):
@@ -65,7 +62,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if path not in self.imageCollectionModels.keys():
             try:
-                if self.isServerPath(path):
+                if isServerPath(path):
                     model = ImageCollectionCloudModel(path, name, type, parentModel=parentModel)
                 else:
                     modelClass = modelClassDict[type]

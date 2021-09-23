@@ -11,7 +11,7 @@ class ImageLabelViewerSubWindow(QtWidgets.QMdiSubWindow):
         self.widget().setTransformActionEnabled(False)
         self.widget().setLabelActionEnabled(False)
         
-        self.saveAction = QtWidgets.QAction('Save', self.widget()) #TODO: implement save function
+        self.saveAction = QtWidgets.QAction('Save', self.widget())
         self.widget().toolbar.addAction(self.saveAction)
         self.saveAction.triggered.connect(self.saveLabelActionTriggered)
 
