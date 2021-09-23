@@ -7,10 +7,14 @@ class PasswdManager:
 
     def getPass(self):
         if self.passwd is None:
-            # self.passwd = getpass.getpass()
-            self.passwd, ok = QInputDialog.getText(None, "Attention", "Password:", 
-                                    QLineEdit.Password)
-            if ok: return self.passwd
+            # getpass implementation
+            self.passwd = getpass.getpass()
+            ok = True
+
+            # UI implementation # BUG
+            # self.passwd, ok = QInputDialog.getText(None, "Authentification", "Password:", QLineEdit.Password)
+            if ok: 
+                return self.passwd
             else: return ''
         else:
             return self.passwd

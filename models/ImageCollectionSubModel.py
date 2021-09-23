@@ -1,4 +1,3 @@
-import os
 from models.ImageCollectionModel import ImageCollectionModel
 
 class ImageCollectionSubModel(ImageCollectionModel):

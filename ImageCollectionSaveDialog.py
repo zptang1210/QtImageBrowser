@@ -1,4 +1,5 @@
 import os
+from utils.isServerPath import isServerPath
 from PyQt5 import QtWidgets
 from ImageCollectionSelectionDialog import ImageCollectionSelectionDialog
 
@@ -26,7 +27,9 @@ class ImageCollectionSaveDialog(ImageCollectionSelectionDialog):
             QtWidgets.QMessageBox.warning(self, 'Warning', 'Invalid name.', QtWidgets.QMessageBox.Ok)
         else:
             path = self.getPath()
-            if (path == '') or (not os.path.exists(path)) or (os.path.exists(os.path.join(path, name))):
+            if path == '':
+                QtWidgets.QMessageBox.warning(self, 'Warning', 'Empty path.', QtWidgets.QMessageBox.Ok)
+            elif (not isServerPath(path)) and (not os.path.exists(path)) or (os.path.exists(os.path.join(path, name))):
                 QtWidgets.QMessageBox.warning(self, 'Warning', 'Invalid path.', QtWidgets.QMessageBox.Ok)
             else:
                 self.accept()

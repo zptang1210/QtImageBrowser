@@ -1,14 +1,9 @@
-from io import DEFAULT_BUFFER_SIZE
 from models.ImageCollectionPPMModel import ImageCollectionPPMModel
 from models.ImageCollectionVideoModel import ImageCollectionVideoModel
 from models.ImageCollectionFolderModel import ImageCollectionFolderModel
 import os
-from getpass import getpass
-from PyQt5 import QtCore
-from pexpect.exceptions import TIMEOUT, EOF
 from models.ImageCollectionModel import ImageCollectionModel
-import utils.PasswdManager as PasswdManager
-import pexpect
+from utils.rsyncWrapper import rsync
 
 class ImageCollectionCloudModel(ImageCollectionModel):
     DEFAULT_LOCAL_ROOT_PATH = os.path.normpath(os.path.join('.', 'tmp'))
@@ -43,49 +38,14 @@ class ImageCollectionCloudModel(ImageCollectionModel):
 
     def load(self, serverPath, localPath):
         if self.type == 'folder' and not serverPath.endswith('/'):
-            serverPath = serverPath + '/'
+            serverPath = serverPath + '/' # copy all files in the folder to the local path, exluding the folder structure
 
         cmd = f'rsync -a --delete {serverPath} {localPath}'      #rsync -av --delete xxx@gypsum.cs.umass.edu:~/testData /Users/xxx/Desktop/tmp
-        print('rsync cmd: ', cmd)
-        child = pexpect.spawn(cmd)
-        
-        i = child.expect(["password", EOF, TIMEOUT], timeout=30)
-        # print(i, child.before, child.after)
-        if i != 0:
-            print('Unexpected situation')
-            return False
+        flag = rsync(cmd)
+        if flag: self.loaded = True
+        else: self.loaded = False
 
-        passwd = PasswdManager.passwdManager.getPass()
-        child.sendline(passwd)
-        i = child.expect(["Permission denied", 'failed', 'error', EOF, TIMEOUT], timeout=200)
-        # print(i, child.before, child.after)
-        if i == 0:
-            print('rsync Permission denied')
-            PasswdManager.passwdManager.currentPasswdIsInvalid()
-            self.loaded = False
-            return False
-        elif i == 3:
-            print('rsync Ok')
-            self.loaded = True
-            return True
-        elif i == 4:
-            print('rsync Timeout')
-            self.loaded = False
-            return False
-        else:
-            print('rsync Error')
-            self.loaded = False
-            return False
-
-        # import paramiko
-        # trans = paramiko.Transport(('gypsum.cs.umass.edu', 22))
-        # trans.connect(username='zhipengtang', password=getpass())
-        # sftp = paramiko.SFTPClient.from_transport(trans)
-        # localpath = '/Users/zhipengtang/Desktop/tmp'
-        # remotepath = '~/testData'
-
-        # sftp.get(remotepath, localpath)
-        # trans.close()
+        return flag
 
 
     def getModel(self):

@@ -5,8 +5,6 @@ import json
 import importlib
 import re
 from utils.RemoteServer import RemoteServer
-from pexpect import pxssh
-from getpass import getpass
 
 class TransformCodeInterpreter:
     def __init__(self):
