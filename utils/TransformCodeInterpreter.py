@@ -1,16 +1,20 @@
-from models.ImageCollectionCloudModel import ImageCollectionCloudModel
 import os
 import time
 import json
 import importlib
 import re
 from utils.RemoteServer import RemoteServer
+from utils.strToRaw import str_to_raw
+from models.ImageCollectionCloudModel import ImageCollectionCloudModel
 
 class TransformCodeInterpreter:
     def __init__(self):
-        jsonPath = os.path.join(os.path.dirname(__file__), 'transformers', 'registeredTransformers.json')
-        with open(jsonPath) as fin:
+        jsonPath = os.path.join('utils', 'transformers', 'registeredTransformers.json')
+        with open(jsonPath, 'r') as fin:
             self.registeredModules = json.load(fin)
+
+        with open('./configs/serverConfigs/registeredServerConfig.json', 'r') as fin:
+            self.serverConfig = json.load(fin)
 
     def parseAndRun(self, rawCode, model, newCollectionName, rootSavePath=None):
         code = self.parse(rawCode)
@@ -48,7 +52,8 @@ class TransformCodeInterpreter:
         if len(code) == 0: return None
         if rootSavePath is None:
             # rootSavePath = os.path.join(model.getRootPath(), 'transform')
-            rootSavePath = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'tmp'))
+            rootSavePath = os.path.abspath(os.path.normpath(os.path.join('.', 'tmp')))
+            print('rootSavePath', rootSavePath)
         for i, (modulePath, className, argsList) in enumerate(code):
             module = importlib.import_module(modulePath)
             classMeta = getattr(module, className)
@@ -62,14 +67,14 @@ class TransformCodeInterpreter:
         return model
 
     def parseAndRunRemotely(self, rawCode, model, newCollectionName, rootSavePath=None):
-        server = RemoteServer('./utils/serverConfigs/gypsum.json')
+        server = RemoteServer(self.serverConfig['config_file'])
         flag = server.login()
         if not flag:
             return None
         randomScriptName = f'script_{time.time()}.txt'
         scriptPath = os.path.join(server.get_processor_path(), 'tmp', 'scripts', randomScriptName)
 
-        genscriptCode = f'echo -e "{self.str_to_raw(rawCode)}" > {scriptPath}'
+        genscriptCode = f'echo -e "{str_to_raw(rawCode)}" > {scriptPath}'
         print('[GENSCRIPT]', genscriptCode)
 
         processorFile = os.path.join(server.get_processor_path(), 'transform_backend.py')
@@ -97,7 +102,3 @@ class TransformCodeInterpreter:
         else:
             newModel = ImageCollectionCloudModel(newServerPath, newName, 'folder', preload=False)
             return newModel
-
-    def str_to_raw(self, s):
-        raw_map = {8:r'\b', 7:r'\a', 12:r'\f', 10:r'\n', 13:r'\r', 9:r'\t', 11:r'\v'}
-        return r''.join(i if ord(i) > 32 else raw_map.get(ord(i), i) for i in s)

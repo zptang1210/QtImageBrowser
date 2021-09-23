@@ -1,15 +1,15 @@
-from models.ImageCollectionCloudModel import ImageCollectionCloudModel
+
 import sys, os
-from models.ImageCollectionFolderModel import ImageCollectionFolderModel
-from models.ImageCollectionVideoModel import ImageCollectionVideoModel
-from models.ImageCollectionPPMModel import ImageCollectionPPMModel
+from PyQt5 import QtCore, QtWidgets
 from ImageBrowserWindow import Ui_MainWindow
+from models.ImageCollectionCloudModel import ImageCollectionCloudModel
 from ImageViewerSubWindow import ImageViewerSubWindow
 from utils.SaveImageCollection import SaveImageCollection
 from ImageCollectionSaveDialog import ImageCollectionSaveDialog
 from ImageCollectionOpenDialog import ImageCollectionOpenDialog
-from PyQt5 import QtCore, QtWidgets
 from utils.isServerPath import isServerPath
+from configs.availTypesConfig import availTypes
+from configs.availTypesConfig import modelClassDict
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -57,8 +57,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def createNewImageCollectionModel(self, path, name, type, parentModel=None):
-        assert type in ('folder', 'video', 'ppm')
-        modelClassDict = {'folder': ImageCollectionFolderModel, 'video': ImageCollectionVideoModel,'ppm': ImageCollectionPPMModel}
+        assert type in availTypes
 
         if path not in self.imageCollectionModels.keys():
             try:
@@ -70,7 +69,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             except:
                 return False, None
             else:
-                self.imageCollectionModels[path] = model
+                self.imageCollectionModels[model.path] = model
                 return True, model               
         else:
             return False, None  
@@ -160,7 +159,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if item.path in self.imageViewerSubWindows.keys():
             for idx in range(item.childCount()):
                 subItem = item.child(idx)
-                self.imageViewerSubWindows[subItem.path].removeAffiliatedWindows()
+                print('before_', subItem.path, self.imageViewerSubWindows)
+                self.imageViewerSubWindows[subItem.path].removeAffiliatedWindows() # BUG: open a collection -> add subcollection -> close the window for sub collection -> close the major collection, need to check if the existence of the sub collection
+                print('after_', subItem.path, self.imageViewerSubWindows)
                 self.mdiArea.removeSubWindow(self.imageViewerSubWindows[subItem.path])
                 self.imageViewerSubWindows.pop(subItem.path)
                 

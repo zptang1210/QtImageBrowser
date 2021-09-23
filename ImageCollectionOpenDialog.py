@@ -2,6 +2,7 @@ import os
 from PyQt5 import QtWidgets
 from ImageCollectionSelectionDialog import ImageCollectionSelectionDialog
 from utils.isServerPath import isServerPath
+from configs.availTypesConfig import availTypes
 
 class ImageCollectionOpenDialog(ImageCollectionSelectionDialog):
 
@@ -11,11 +12,11 @@ class ImageCollectionOpenDialog(ImageCollectionSelectionDialog):
     # override
     def fileDialogButtonClicked(self):
         selectedType = self.typeComboBox.currentText()
-        if selectedType == ImageCollectionSelectionDialog.availTypes[0]:
+        if selectedType == availTypes[0]:
             path = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Image Folder', '')
-        elif selectedType == ImageCollectionSelectionDialog.availTypes[1]:
+        elif selectedType == availTypes[1]:
             path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '', 'Videos (*.mp4 *.avi)')
-        elif selectedType == ImageCollectionSelectionDialog.availTypes[2]:
+        elif selectedType == availTypes[2]:
             path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '', 'PPM Image (*.ppm)')
         else:
             path = None
@@ -32,13 +33,13 @@ class ImageCollectionOpenDialog(ImageCollectionSelectionDialog):
         path = self.getPath()
 
         invalid = False
-        if selectedType == ImageCollectionSelectionDialog.availTypes[0]:
+        if selectedType == availTypes[0]:
             if not self.pathExists(path):
                 invalid = True
-        elif selectedType == ImageCollectionSelectionDialog.availTypes[1]:
+        elif selectedType == availTypes[1]:
             if (not self.pathExists(path)) or (os.path.splitext(path)[1].lower() not in ('.mp4', '.avi')):
                 invalid = True
-        elif selectedType == ImageCollectionSelectionDialog.availTypes[2]:
+        elif selectedType == availTypes[2]:
             if (not self.pathExists(path)) or (os.path.splitext(path)[1].lower() != '.ppm'):
                 invalid = True
         else:

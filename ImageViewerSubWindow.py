@@ -11,7 +11,9 @@ class ImageViewerSubWindow(QtWidgets.QMdiSubWindow):
 
     def closeEvent(self, event):
         self.removeAffiliatedWindows()
+        print('before', self.parent.imageViewerSubWindows, self.model.path)
         self.parent.imageViewerSubWindows.pop(self.model.path)
+        print('after', self.parent.imageViewerSubWindows)
 
     def removeAffiliatedWindows(self):
         for win in self.widget.openedLabelSubWindows:

@@ -1,10 +1,9 @@
 import os
 from PyQt5 import QtCore
-from models.ImageCollectionPPMModel import ImageCollectionPPMModel
-from models.ImageCollectionVideoModel import ImageCollectionVideoModel
-from models.ImageCollectionFolderModel import ImageCollectionFolderModel
 from utils.isServerPath import isServerPath
 from utils.rsyncWrapper import rsync
+from configs.availTypesConfig import availTypes
+from configs.availTypesConfig import modelClassDict
 
 class SaveSignals(QtCore.QObject):
     finished = QtCore.pyqtSignal(bool)
@@ -14,14 +13,13 @@ class SaveImageCollection(QtCore.QRunnable):
         super().__init__()
         self.modelToSave = modelToSave
         self.savePath = savePath
-        assert targetType in ('folder', 'video', 'ppm')
+        assert targetType in availTypes
         self.targetType = targetType
 
         self.signals = SaveSignals()
     
     @QtCore.pyqtSlot()
     def run(self):
-        modelClassDict = {'folder': ImageCollectionFolderModel, 'video': ImageCollectionVideoModel,'ppm': ImageCollectionPPMModel}
         # TODO: check if the path is to the server, if yes, save model to a temp place and then upload it.
         # If modelToSave is a cloud type, and the path is also a cloud path, copy directly on the server side.
         if not isServerPath(self.savePath):

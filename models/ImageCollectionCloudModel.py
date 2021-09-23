@@ -1,9 +1,8 @@
-from models.ImageCollectionPPMModel import ImageCollectionPPMModel
-from models.ImageCollectionVideoModel import ImageCollectionVideoModel
-from models.ImageCollectionFolderModel import ImageCollectionFolderModel
 import os
 from models.ImageCollectionModel import ImageCollectionModel
 from utils.rsyncWrapper import rsync
+from configs.availTypesConfig import availTypes
+from configs.availTypesConfig import modelClassDict
 
 class ImageCollectionCloudModel(ImageCollectionModel):
     DEFAULT_LOCAL_ROOT_PATH = os.path.normpath(os.path.join('.', 'tmp'))
@@ -13,7 +12,7 @@ class ImageCollectionCloudModel(ImageCollectionModel):
         self.path = path
         self.name = name
         self.type = type
-        assert self.type in ('folder', 'video', 'ppm')
+        assert self.type in availTypes
         self.parentModel = parentModel
 
         if localPath is None:
@@ -49,7 +48,6 @@ class ImageCollectionCloudModel(ImageCollectionModel):
 
 
     def getModel(self):
-        modelClassDict = {'folder': ImageCollectionFolderModel, 'video': ImageCollectionVideoModel,'ppm': ImageCollectionPPMModel}
         modelClass = modelClassDict[self.type]
         model = modelClass(self.localPath, self.name, parentModel=self.parentModel)
         return model

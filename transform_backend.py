@@ -2,9 +2,8 @@ import os, sys
 import time
 import argparse
 from utils.TransformCodeInterpreter import TransformCodeInterpreter
-from models.ImageCollectionFolderModel import ImageCollectionFolderModel
-from models.ImageCollectionVideoModel import ImageCollectionVideoModel
-from models.ImageCollectionPPMModel import ImageCollectionPPMModel
+from configs.availTypesConfig import availTypes
+from configs.availTypesConfig import modelClassDict
 
 def argsParser():
     parser = argparse.ArgumentParser()
@@ -25,7 +24,7 @@ def checkArgs(args):
     if not os.path.exists(args.model_path):
         print('model_path not exists', file=sys.stderr)
         return False
-    if args.model_type not in ('folder', 'video', 'ppm'):
+    if args.model_type not in availTypes:
         print('invalid model_type', file=sys.stderr)
         return False
     if not os.path.exists(args.script_file):
@@ -35,8 +34,6 @@ def checkArgs(args):
 
 
 def createModel(path, name, type):
-    modelClassDict = {'folder': ImageCollectionFolderModel, 'video': ImageCollectionVideoModel,'ppm': ImageCollectionPPMModel}
-
     modelClass = modelClassDict[type]
     try:
         model = modelClass(path, name, parentModel=None)

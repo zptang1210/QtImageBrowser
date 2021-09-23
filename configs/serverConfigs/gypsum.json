@@ -2,5 +2,5 @@
     "server": "gypsum.cs.umass.edu",
     "username": "zhipengtang",
     "processor_path": "/home/zhipengtang/.imageBrowserProcessor",
-    "template_path": "./utils/serverConfigs/gypsum_template.txt"
+    "template_path": "./configs/serverConfigs/gypsum_template.txt"
 }

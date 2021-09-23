@@ -1,8 +1,8 @@
 import os
 from PyQt5 import QtWidgets
+from configs.availTypesConfig import availTypes
 
 class ImageCollectionSelectionDialog(QtWidgets.QDialog):
-    availTypes = ('folder', 'video', 'ppm')
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -21,7 +21,7 @@ class ImageCollectionSelectionDialog(QtWidgets.QDialog):
 
         self.layout.addWidget(QtWidgets.QLabel('Select type: '), 0, 0, 1, 1)
         self.typeComboBox = QtWidgets.QComboBox(self)
-        self.typeComboBox.addItems(ImageCollectionSelectionDialog.availTypes)
+        self.typeComboBox.addItems(availTypes)
         self.layout.addWidget(self.typeComboBox, 0, 1, 1, 2)
 
         self.layout.addWidget(QtWidgets.QLabel('Input name: '), 1, 0, 1, 1)
@@ -57,7 +57,7 @@ class ImageCollectionSelectionDialog(QtWidgets.QDialog):
     
     def getType(self):
         selectedType = self.typeComboBox.currentText()
-        assert selectedType in ImageCollectionSelectionDialog.availTypes
+        assert selectedType in availTypes
         return selectedType
 
 if __name__ == '__main__':
