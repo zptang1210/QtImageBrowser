@@ -1,11 +1,10 @@
 from PyQt5 import QtCore
-from utils.TransformCodeParseAndRunThread import TransformCodeParseAndRunThread
-from models.ImageCollectionSubModel import ImageCollectionSubModel
-from utils.TransformCodeInterpreter import TransformCodeInterpreter
-from TransformDialog import TransformDialog
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QIcon, QImage, QPixmap, qRgb
+from utils.TransformCodeParseAndRunThread import TransformCodeParseAndRunThread
+from models.ImageCollectionSubModel import ImageCollectionSubModel
+from main.TransformDialog import TransformDialog
 from PIL import Image
 import numpy as np
 

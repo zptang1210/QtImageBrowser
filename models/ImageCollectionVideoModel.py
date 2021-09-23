@@ -1,10 +1,9 @@
 import os
-from utils.pathUtils import normalizePath
 import cv2
 from decord import VideoReader
 from decord import cpu
-
 from models.ImageCollectionModel import ImageCollectionModel
+from utils.pathUtils import normalizePath
 
 
 class ImageCollectionVideoModel(ImageCollectionModel):

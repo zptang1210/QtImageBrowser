@@ -1,4 +1,3 @@
-import argparse
 import numpy as np
 import cv2
 from utils.transformers.Transform_base import Transform_base

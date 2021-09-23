@@ -1,5 +1,5 @@
-from ImageViewerWidget import ImageViewerWidget
 from PyQt5 import QtWidgets
+from main.ImageViewerWidget import ImageViewerWidget
 
 class ImageViewerSubWindow(QtWidgets.QMdiSubWindow):
     def __init__(self, model, parent=None):

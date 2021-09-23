@@ -1,7 +1,7 @@
 import os
-from utils.pathUtils import isServerPath, normalizePath
 from PyQt5 import QtWidgets
-from ImageCollectionSelectionDialog import ImageCollectionSelectionDialog
+from main.ImageCollectionSelectionDialog import ImageCollectionSelectionDialog
+from utils.pathUtils import isServerPath, normalizePath
 
 class ImageCollectionSaveDialog(ImageCollectionSelectionDialog):
     
