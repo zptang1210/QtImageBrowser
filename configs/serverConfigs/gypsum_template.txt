@@ -1,5 +1,5 @@
 srun --pty --gres=gpu:1 -t 0-01:00 /bin/bash
-conda activate tracking
+conda activate qt
 [GENSCRIPT]
 [RUN]
 exit

@@ -1,4 +1,4 @@
-import os
+import os, shutil
 import time
 import traceback
 from abc import abstractmethod
@@ -38,6 +38,7 @@ class Transform_base:
         try:
             if os.path.exists(savePath):
                 # shutil.rmtree(savePath) # should avoid this since it may replace existing opened files
+                print('Path already exists...')
                 return None
             else: os.makedirs(savePath)
             for img_np, img_name in self.processImageCollection(model, self.args):
@@ -46,12 +47,14 @@ class Transform_base:
         except ValueError as e:
             print('Error occured during running transformation due to unknown arguments.')
             print(e, '\n', traceback.format_exc())
+            shutil.rmtree(savePath)
             return None
         except Exception as e:
             print('Unknown error occured during running transformation.')
             print(e, '\n', traceback.format_exc())
+            shutil.rmtree(savePath)
             return None
-        
+
         return ImageCollectionFolderModel(savePath, saveName)
 
     @classmethod
