@@ -13,7 +13,11 @@ class ImageLabelViewerSubWindow(QtWidgets.QMdiSubWindow):
         
         self.saveAction = QtWidgets.QAction('Save', self.widget()) #TODO: implement save function
         self.widget().toolbar.addAction(self.saveAction)
+        self.saveAction.triggered.connect(self.saveLabelActionTriggered)
 
     def closeEvent(self, event):
         self.parent.setLabelActionEnabled(True)
         self.parent.openedLabelSubWindows.remove(self)
+
+    def saveLabelActionTriggered(self):
+        self.parent.parent.parent.saveAndOpenCollection(self.model)

@@ -130,15 +130,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
         else:
             item = items[0]
+            modelToSave = self.imageCollectionModels[item.path]
+            self.saveAndOpenCollection(modelToSave)
         
+
+    def saveAndOpenCollection(self, modelToSave):
         diag = ImageCollectionSaveDialog(self)
         if diag.exec_():
             path = diag.getPath()
             name = diag.getName()
             savePath = os.path.join(path, name)
             targetType = diag.getType()
-
-            modelToSave = self.imageCollectionModels[item.path]
+            
             callback = lambda flag: self.saveFinishedCallback(savePath, name, targetType, flag)
             SaveImageCollection.save(modelToSave, savePath, targetType, self.threadpool, callback)
 

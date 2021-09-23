@@ -183,7 +183,7 @@ class ImageViewerWidget(QtWidgets.QWidget):
                 self.labelList[i].add(currentIdx)
             else:
                 self.labelList[i].discard(currentIdx)
-        print(self.labelList)
+        # print(self.labelList)
 
     def labelViewActionTriggered(self, idx):
         if len(self.labelList[idx]) == 0:

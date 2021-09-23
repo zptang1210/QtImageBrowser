@@ -26,7 +26,7 @@ class ImageCollectionSaveDialog(ImageCollectionSelectionDialog):
             QtWidgets.QMessageBox.warning(self, 'Warning', 'Invalid name.', QtWidgets.QMessageBox.Ok)
         else:
             path = self.getPath()
-            if (path == '') or (os.path.exists(path)):
+            if (path == '') or (not os.path.exists(path)) or (os.path.exists(os.path.join(path, name))):
                 QtWidgets.QMessageBox.warning(self, 'Warning', 'Invalid path.', QtWidgets.QMessageBox.Ok)
             else:
                 self.accept()
