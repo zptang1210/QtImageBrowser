@@ -73,7 +73,7 @@ def runTransform():
     rootSavePath = os.path.normpath(os.path.join(os.path.dirname(__file__), 'tmp'))
     model = runScript(rawCode, model, args.result_name, rootSavePath)
     if model is None:
-        # print('failed to run the script', file=sys.stderr)
+        print('failed to run the script', file=sys.stderr)
         return False, None, None
     
     return True, model.path, model.name

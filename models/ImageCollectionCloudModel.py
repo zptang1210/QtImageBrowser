@@ -11,7 +11,7 @@ import utils.PasswdManager as PasswdManager
 import pexpect
 
 class ImageCollectionCloudModel(ImageCollectionModel):
-    DEFAULT_LOCAL_ROOT_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'tmp'))
+    DEFAULT_LOCAL_ROOT_PATH = os.path.normpath(os.path.join('.', 'tmp'))
 
     def __init__(self, path, name, type, localPath=None, preload=True, parentModel=None):
         super().__init__()
