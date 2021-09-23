@@ -74,7 +74,7 @@ class TransformCodeInterpreter:
         genscriptCode = f'echo -e "{self.str_to_raw(rawCode)}" > {scriptPath}'
         print('[GENSCRIPT]', genscriptCode)
 
-        processorFile = os.path.join(server.get_processor_path(), 'transform.py')
+        processorFile = os.path.join(server.get_processor_path(), 'transform_backend.py')
         modelPath = model.getRootPath().split(':')[1]
         modelType = model.type
         resultName = newCollectionName
