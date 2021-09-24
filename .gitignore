@@ -5,3 +5,4 @@ testData/
 .idea/
 tmp/
 resources/deprecated/
+utils/transformers/optical_flow/thirdparty/

@@ -1,5 +1,6 @@
 {
     "cvtColor": ["utils.transformers.Transform_cvtColor", "Transform_cvtColor"],
     "stabilizedTrack": ["utils.transformers.Transform_stabilizedTrack", "Transform_stabilizedTrack"],
-    "pwcnet": ["utils.transformers.optical_flow.Transform_PWCNET", "Transform_PWCNET"]
+    "pwcnet": ["utils.transformers.optical_flow.Transform_PWCNET", "Transform_PWCNET"],
+    "raft": ["utils.transformers.optical_flow.Transform_RAFT", "Transform_RAFT"]
 }

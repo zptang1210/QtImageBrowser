@@ -18,10 +18,9 @@ class Transform_PWCNET(Transform_base):
         assert imgNum > 0
 
         for i in range(imgNum-1):
-            print(f'- processing {i}/{imgNum-1}')
-
             firstImg, firstImgName = model.get(i)
-            secondImg, _ = model.get(i+1)
+            secondImg, secondImgName = model.get(i+1)
+            print(f'- processing {i}/{imgNum-1} - {firstImgName} -> {secondImgName}')
 
             firstImg = firstImg[:, :, ::-1].transpose(2, 0, 1).astype(np.float32) * (1.0 / 255.0)
             secondImg = secondImg[:, :, ::-1].transpose(2, 0, 1).astype(np.float32) * (1.0 / 255.0)
