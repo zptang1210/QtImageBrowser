@@ -23,6 +23,11 @@ You can also create multiple configurations, remember to change registeredServer
     * go to the root folder
     * python ImageBrowser.py
 
+Transformer module specific required packages:
+* optical flow: 
+- PWC-NET: pytorch, cupy (pip install cupy-cuda111), flow_viz (pip install flow_viz)
+* RAFT: scipy
+
 # Add your own image transformation modules:
 1. create your own class derived from Transform_base class
 2. implement getArgParser and processImageCollection methods in your own class
