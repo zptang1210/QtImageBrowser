@@ -165,7 +165,7 @@ class ImageViewerWidget(QtWidgets.QWidget):
             return
 
         subModel = ImageCollectionSubModel('label_' + str(idx), list(self.labelList[idx]), self.model)
-        import ImageLabelViewerSubWindow
+        from main import ImageLabelViewerSubWindow
         labelWindow = ImageLabelViewerSubWindow.ImageLabelViewerSubWindow(subModel, self)
         self.openedLabelSubWindows.append(labelWindow)
         self.parent.parent.mdiArea.addSubWindow(labelWindow)
