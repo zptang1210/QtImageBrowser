@@ -19,7 +19,7 @@ class RemoteServer:
     def login(self):
         try:
             self.server = pxssh.pxssh()
-            self.server.login(server=self.config['server'], username=self.config['username'], password=PasswdManager.passwdManager.getPass())
+            self.server.login(server=self.config['server'], username=self.config['username'], password=PasswdManager.passwdManager.getPass(), sync_multiplier=5)
         except pxssh.ExceptionPexpect as e:
             print('pxssh failed.', e)
             PasswdManager.passwdManager.currentPasswdIsInvalid()
