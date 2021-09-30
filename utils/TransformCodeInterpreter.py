@@ -3,6 +3,7 @@ import time
 import json
 import importlib
 import re
+import traceback
 from utils.pathUtils import normalizePath
 from utils.RemoteServer import RemoteServer
 from utils.strToRaw import str_to_raw
@@ -14,19 +15,28 @@ class TransformCodeInterpreter:
         with open(jsonPath, 'r') as fin:
             self.registeredModules = json.load(fin)
 
+        jsonPath = os.path.join('utils', 'interactTools', 'registeredInteractCmds.json')
+        with open(jsonPath, 'r') as fin:
+            self.registeredInteractCmds = json.load(fin)
+
         with open('./configs/serverConfigs/registeredServerConfig.json', 'r') as fin:
             self.serverConfig = json.load(fin)
 
     def parseAndRun(self, rawCode, model, newCollectionName, rootSavePath=None):
-        code = self.parse(rawCode)
-        if code is not None:
-            model = self.run(code, model, newCollectionName, rootSavePath=rootSavePath)
-            return model
-        else:
+        code, macros = self.parse(rawCode)
+        if code is None:
             return None
+
+        code = self.preprocess(model, code, macros)
+        if code is None:
+            return None
+
+        model = self.run(code, model, newCollectionName, rootSavePath=rootSavePath)
+        return model
 
     def parse(self, rawCode):
         code = []
+        macros = []
         lines = rawCode.strip().split('\n')
         for line in lines:
             line = line.strip()
@@ -36,14 +46,68 @@ class TransformCodeInterpreter:
             command = line[0]
             argsList = line[1:]
 
-            modulePath, className = self.getModule(command)
-            if modulePath is None:
-                print('Unknown command or unregistered command.')
-                return None
-            else:
-                code.append((modulePath, className, argsList))
+            if command == '#define': # macros for the preprocessor
+                if len(argsList) < 2: return None, None # invalid #define
+                else:
+                    macroName = argsList[0]
+                    interactiveCmd = argsList[1]
+                    macros.append((macroName, interactiveCmd))
+            else: # ordinary command
+                modulePath, className = self.getModule(command)
+                if modulePath is None:
+                    print('Unknown command or unregistered command.')
+                    return None, None
+                else:
+                    code.append((modulePath, className, argsList))
 
-        return code
+        if len(code) == 0: return None, None # avoid empty script
+        return code, macros
+
+    def preprocess(self, model, code, macros):
+        if len(macros) == 0: return code # no macro found
+
+        macroDict = dict()
+        for macroName, interactiveCmd in macros:
+            macroValue = self.runInteractiveCmd(model, interactiveCmd)
+            if macroValue is not None:
+                macroDict[macroName] = macroValue
+            else:
+                return None # invalid value returned from the interactive command
+        
+        # replace all [macro] appear in args with macroDict[macro]
+        newCode = []
+        for modulePath, className, argsList in code:
+            argsStr = ' '.join(argsList)
+            for macroName in macroDict.keys():
+                argsStr = argsStr.replace(f'[{macroName}]', macroDict[macroName])
+            newArgsList = argsStr.split()
+
+            newCode.append((modulePath, className, newArgsList))
+        return newCode
+
+    def runInteractiveCmd(self, model, cmd):
+        modulePath, className = self.registeredInteractCmds.get(cmd, (None, None))
+        if modulePath is None: # cannot find the interactive command
+            print('Unknown interactive command.')
+            return None
+
+        try:
+            module = importlib.import_module(modulePath)
+            classMeta = getattr(module, className)
+            interactiveTool = classMeta()
+        except:
+            print('Loading interactive tool failed', traceback.format_exc())
+            return None
+
+        try:
+            result = interactiveTool.run(model)
+        except:
+            print('Running interactive tool failed.', traceback.format_exc())
+        else:
+            if result is not None and isinstance(result, str):
+                return result
+            else:
+                return None
 
     def getModule(self, cmd):
         modulePath, className = self.registeredModules.get(cmd, (None, None))
@@ -53,8 +117,6 @@ class TransformCodeInterpreter:
         if rootSavePath is None:
             rootSavePath = os.path.join('.', 'tmp')
         rootSavePath = normalizePath(rootSavePath)
-
-        if len(code) == 0: return None # avoid empty script
 
         for i, (modulePath, className, argsList) in enumerate(code):
             module = importlib.import_module(modulePath)

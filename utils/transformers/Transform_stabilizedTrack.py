@@ -1,3 +1,4 @@
+import argparse
 import numpy as np
 import cv2
 from utils.transformers.Transform_base import Transform_base
@@ -51,25 +52,30 @@ class Transform_stabilizedTrack(Transform_base):
         return img
 
     def getArgParser(self):
-        return None
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--bbox', nargs='+', type=int)
+        return parser
 
     def processImageCollection(self, model, args):
         frame, _ = model.get(0)
         print(frame.shape, type(frame))
-        frame = cv2.resize(frame, (3*frame.shape[1]//4, 3*frame.shape[0]//4))
+        # frame = cv2.resize(frame, (3*frame.shape[1]//4, 3*frame.shape[0]//4))
 
-        # Uncomment the line below to select a different bounding box
-        frame_ = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        # # Uncomment the line below to select a different bounding box
+        # frame_ = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-        # CAUTIOUS: Now the image browser supports multithreading. This makes the following line fail because opencv only allow window related functions to run on the main thread (on macos).
-        # Thus you need to use a new process to run window related functions!
-        # # bbox = cv2.selectROI(frame_, False)
+        # # CAUTIOUS: Now the image browser supports multithreading. This makes the following line fail because opencv only allow window related functions to run on the main thread (on macos).
+        # # Thus you need to use a new process to run window related functions!
+        # # # bbox = cv2.selectROI(frame_, False)
 
-        queue = Queue()
-        p = Process(target=selectROI, args=(queue, frame_, False))
-        p.start()
-        p.join()
-        bbox = queue.get(True)
+        # queue = Queue()
+        # p = Process(target=selectROI, args=(queue, frame_, False))
+        # p.start()
+        # p.join()
+        # bbox = queue.get(True)
+        # print(bbox)
+
+        bbox = tuple(args.bbox)
         print(bbox)
 
         # Initialize tracker with first frame and bounding box
@@ -89,7 +95,7 @@ class Transform_stabilizedTrack(Transform_base):
 
                 # Read a new frame
                 frame, _ = model.get(idx)
-                frame = cv2.resize(frame, (3*frame.shape[1]//4, 3*frame.shape[0]//4))
+                # frame = cv2.resize(frame, (3*frame.shape[1]//4, 3*frame.shape[0]//4))
     
                 # Start timer
                 timer = cv2.getTickCount()
@@ -147,7 +153,7 @@ class Transform_stabilizedTrack(Transform_base):
                 #cv2.imwrite(os.path.join('dst',"%06d.png"%(count)), frame)
 
                 frame_with_viz = np.concatenate((frame, flowviz), axis=1)
-                frame_with_viz = cv2.resize(frame_with_viz, (3*frame_with_viz.shape[1]//4, 3*frame_with_viz.shape[0]//4))
+                # frame_with_viz = cv2.resize(frame_with_viz, (3*frame_with_viz.shape[1]//4, 3*frame_with_viz.shape[0]//4))
                 yield frame_with_viz, model.getImgName(idx)
                 count += 1
                 del frame
