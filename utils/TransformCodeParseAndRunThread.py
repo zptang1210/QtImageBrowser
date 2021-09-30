@@ -9,9 +9,9 @@ class TransformSignals(QtCore.QObject):
 
 
 class TransformCodeParseAndRunThread(QtCore.QRunnable):
-    def __init__(self, rawCode, model, newCollectionName):
+    def __init__(self, rawScript, model, newCollectionName):
         super().__init__()
-        self.code = rawCode
+        self.script = rawScript
         self.model = model
         self.newCollectionName = newCollectionName
 
@@ -21,9 +21,14 @@ class TransformCodeParseAndRunThread(QtCore.QRunnable):
     @QtCore.pyqtSlot()
     def run(self):
         if isinstance(self.model, ImageCollectionCloudModel):
-            newModel = self.parser.parseAndRunRemotely(self.code, self.model, self.newCollectionName)
+            newScript = self.parser.getScriptWoMacros(self.script, self.model)
+            if newScript is not None:
+                newModel = self.parser.parseAndRunRemotely(newScript, self.model, self.newCollectionName)
+            else:
+                self.signals.failed.emit() # invalid code
+                return
         else:
-            newModel = self.parser.parseAndRun(self.code, self.model, self.newCollectionName)
+            newModel = self.parser.parseAndRun(self.script, self.model, self.newCollectionName)
             
         if newModel:
             self.signals.finished.emit(newModel)
@@ -31,8 +36,8 @@ class TransformCodeParseAndRunThread(QtCore.QRunnable):
             self.signals.failed.emit()
 
     @staticmethod
-    def parseAndRun(rawCode, model, newCollectionName, threadpool, callback):
-        parseAndRunThread = TransformCodeParseAndRunThread(rawCode, model, newCollectionName)
+    def parseAndRun(rawScript, model, newCollectionName, threadpool, callback):
+        parseAndRunThread = TransformCodeParseAndRunThread(rawScript, model, newCollectionName)
         parseAndRunThread.signals.finished.connect(callback)
         parseAndRunThread.signals.failed.connect(lambda: callback(None))
 

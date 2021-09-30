@@ -58,7 +58,7 @@ class TransformCodeInterpreter:
                     print('Unknown command or unregistered command.')
                     return None, None
                 else:
-                    code.append((modulePath, className, argsList))
+                    code.append((command, modulePath, className, argsList))
 
         if len(code) == 0: return None, None # avoid empty script
         return code, macros
@@ -76,13 +76,13 @@ class TransformCodeInterpreter:
         
         # replace all [macro] appear in args with macroDict[macro]
         newCode = []
-        for modulePath, className, argsList in code:
+        for command, modulePath, className, argsList in code:
             argsStr = ' '.join(argsList)
             for macroName in macroDict.keys():
                 argsStr = argsStr.replace(f'[{macroName}]', macroDict[macroName])
             newArgsList = argsStr.split()
 
-            newCode.append((modulePath, className, newArgsList))
+            newCode.append((command, modulePath, className, newArgsList))
         return newCode
 
     def runInteractiveCmd(self, model, cmd):
@@ -118,7 +118,7 @@ class TransformCodeInterpreter:
             rootSavePath = os.path.join('.', 'tmp')
         rootSavePath = normalizePath(rootSavePath)
 
-        for i, (modulePath, className, argsList) in enumerate(code):
+        for i, (command, modulePath, className, argsList) in enumerate(code):
             module = importlib.import_module(modulePath)
             classMeta = getattr(module, className)
             transformer = classMeta()
@@ -129,6 +129,22 @@ class TransformCodeInterpreter:
                 return None
         
         return model
+
+    def getScriptWoMacros(self, rawCode, model):
+        parsedCode, macros = self.parse(rawCode)
+        if parsedCode is None:
+            return None
+
+        codeWoMacros = self.preprocess(model, parsedCode, macros)
+        if codeWoMacros is None:
+            return None
+
+        newScript = ''
+        for (command, modulePath, className, argsList) in codeWoMacros:
+            line = f"{command} {' '.join(argsList)}\n"
+            newScript += line
+        
+        return newScript
 
     def parseAndRunRemotely(self, rawCode, model, newCollectionName):
         server = RemoteServer(self.serverConfig['config_file'])
