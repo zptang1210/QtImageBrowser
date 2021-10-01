@@ -9,11 +9,17 @@ from PIL import Image
 import numpy as np
 
 class ImageViewerWidget(QtWidgets.QWidget):
+    maxLabelNum = 3
+
+
     def __init__(self, model, parent=None):
         super().__init__(parent)
         self.setWindowTitle(model.name)
         self.model = model
         self.parent = parent
+
+        self.maxLabelNum = ImageViewerWidget.maxLabelNum
+        self.scale = 100
 
         self.openedLabelSubWindows = []
         
@@ -23,17 +29,18 @@ class ImageViewerWidget(QtWidgets.QWidget):
         self.toolbar = QtWidgets.QToolBar()
         # self.toolbar.setToolButtonStyle(Qt.ToolButtonIconOnly)
 
+        # Transform
         self.transformAction = QtWidgets.QAction('Transform', self)
         # self.transformAction = QtWidgets.QAction(QIcon('resources/icons/transformIcon.ico'), 'Transform', self)
         self.transformAction.setShortcut('Ctrl+T')
         self.toolbar.addAction(self.transformAction)
         self.transformAction.triggered.connect(self.transformActionTriggered)
 
+        # Label
         self.labelToolButton = QtWidgets.QToolButton()
         self.labelToolButton.setText('Label ')
         self.labelToolButton.setPopupMode(QtWidgets.QToolButton.InstantPopup)
 
-        self.maxLabelNum = 3
         assert 1 <= self.maxLabelNum <= 9
         self.labelMenu = QtWidgets.QMenu()
         self.labelToggleActions = {}
@@ -55,13 +62,35 @@ class ImageViewerWidget(QtWidgets.QWidget):
             self.labelViewActions[i] = labelAction
             self.labelMenu.addAction(labelAction)        
         self.labelToolButton.setMenu(self.labelMenu)
+        self.toolbar.addWidget(self.labelToolButton)
 
+        # Scale
+        self.scaleToolButton = QtWidgets.QToolButton()
+        self.scaleToolButton.setText('Scale ')
+        self.scaleToolButton.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+
+        self.scaleMenu = QtWidgets.QMenu()
+        self.zoominAction = QtWidgets.QAction('Zoom in', self)
+        self.zoominAction.setShortcut('=')
+        self.zoominAction.triggered.connect((lambda checked, signal='+': self.scaleActionTriggered(signal)))
+        self.zoomoutAction = QtWidgets.QAction('Zoom out', self)
+        self.zoomoutAction.setShortcut('-')
+        self.zoomoutAction.triggered.connect((lambda checked, signal='-': self.scaleActionTriggered(signal)))
+        self.originalScaleAction = QtWidgets.QAction('Reset to original scale', self)
+        self.originalScaleAction.setShortcut('r')
+        self.originalScaleAction.triggered.connect((lambda checked, signal='r': self.scaleActionTriggered(signal)))
+        self.scaleMenu.addAction(self.zoominAction)
+        self.scaleMenu.addAction(self.zoomoutAction)
+        self.scaleMenu.addAction(self.originalScaleAction)
+
+        self.scaleToolButton.setMenu(self.scaleMenu)
+        self.toolbar.addWidget(self.scaleToolButton)
+
+        # Copy path
         self.getPathAction = QtWidgets.QAction('Copy Path', self)
         self.getPathAction.setShortcut('Ctrl+C')
         self.toolbar.addAction(self.getPathAction)
         self.getPathAction.triggered.connect(self.getPathActionTriggered)
-
-        self.toolbar.addWidget(self.labelToolButton)
         
         self.mainLayout = QtWidgets.QVBoxLayout()
         self.mainLayout.setMenuBar(self.toolbar)
@@ -70,6 +99,7 @@ class ImageViewerWidget(QtWidgets.QWidget):
         self.hLayout = QtWidgets.QHBoxLayout()
         self.mainLayout.addLayout(self.hLayout)
 
+        # # Image Label
         # self.image = QImage('a.jpg')
 
         # image = Image.open('b.jpg')
@@ -82,11 +112,13 @@ class ImageViewerWidget(QtWidgets.QWidget):
         image_qimg.fill(qRgb(255, 255, 255))
         image_pixmap = QPixmap(image_qimg)
         self.imageLabel = QtWidgets.QLabel()
+        # self.imageLabel.setScaledContents(True)
         self.imageLabel.setAlignment(Qt.AlignCenter)
         self.imageLabel.setPixmap(image_pixmap)
         
         self.hLayout.addWidget(self.imageLabel)
 
+        # Slider
         self.slider = QtWidgets.QSlider(Qt.Vertical, self)
         self.slider.setMinimum(0)
         self.slider.setMaximum(self.model.length()-1)
@@ -107,9 +139,16 @@ class ImageViewerWidget(QtWidgets.QWidget):
         h, w, c = image_np.shape
         image_qimg = QImage(image_np.data.tobytes(), w, h, 3*w, QImage.Format_RGB888)
         image_pixmap = QPixmap(image_qimg)
+        if self.scale != 100:
+            scaled_w = w * (self.scale / 100)
+            scaled_h = h * (self.scale / 100)
+            image_pixmap = image_pixmap.scaled(scaled_w, scaled_h, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.imageLabel.setPixmap(image_pixmap)
 
-        self.extraInfoLabel.setText(f'{image_name}')
+        if self.scale == 100:
+            self.extraInfoLabel.setText(f'{image_name}')
+        else:
+            self.extraInfoLabel.setText(f'{image_name} ({self.scale}%)')
 
         for i in range(1, self.maxLabelNum+1):
             if value in self.labelList[i]:
@@ -139,7 +178,6 @@ class ImageViewerWidget(QtWidgets.QWidget):
         else:
             QtWidgets.QMessageBox.warning(self, 'Warning', 'Failed to run the commands!', QtWidgets.QMessageBox.Ok)
             self.transformAction.trigger()
-
 
     def getCurrentImgIdx(self):
         return self.slider.value()
@@ -180,3 +218,25 @@ class ImageViewerWidget(QtWidgets.QWidget):
             action.setEnabled(flag)
         for action in self.labelViewActions.values():
             action.setEnabled(flag)       
+
+    def scaleActionTriggered(self, signal):
+        if signal == '+':
+            self.scale += 10
+        elif signal == '-':
+            self.scale -= 10
+        elif signal == 'r':
+            self.scale = 100
+        else:
+            raise ValueError('Invalid argument for scaleActionTriggered')
+
+        if self.scale == 200:
+            self.zoominAction.setEnabled(False)
+        elif self.scale == 10:
+            self.zoomoutAction.setEnabled(False)
+        else:
+            self.zoominAction.setEnabled(True)
+            self.zoomoutAction.setEnabled(True)
+
+        assert 10 <= self.scale <= 200
+
+        self.sliderValueChanged(self.slider.value())
