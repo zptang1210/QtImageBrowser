@@ -3,24 +3,31 @@ from PyQt5.QtWidgets import QInputDialog, QLineEdit
 
 class PasswdManager:
     def __init__(self):
-        self.passwd = None
+        self.passwds = {}
 
-    def getPass(self):
-        if self.passwd is None:
-            # getpass implementation
-            self.passwd = getpass.getpass()
-            ok = True
+    def getPasswd(self, srv):
+        passwd = self.passwds.get(srv, None)
+        if passwd is not None:
+            return passwd
 
-            # UI implementation # BUG
-            # self.passwd, ok = QInputDialog.getText(None, "Authentification", "Password:", QLineEdit.Password)
-            if ok: 
-                return self.passwd
-            else: return ''
-        else:
-            return self.passwd
+        passwd = PasswdManager.requestPasswd(srv)
+        if passwd != '':
+            self.passwds[srv] = passwd
+        return passwd
+    
+    def invalidateStoredPasswd(self, srv):
+        if srv in self.passwds.keys():
+            del self.passwds[srv]
 
-    def currentPasswdIsInvalid(self):
-        self.passwd = None
+    def requestPasswd(srv):
+        srv_str = f'{srv[1]}@{srv[0]}'
+        passwd = getpass.getpass(srv_str + '\'s password: ')
+
+        # UI implementation # BUG
+        # passwd, ok = QInputDialog.getText(None, "Authentification", "Password:", QLineEdit.Password)
+
+        return passwd
+
 
 passwdManager = PasswdManager()
 

@@ -1,6 +1,6 @@
 import os
 from PyQt5 import QtCore
-from utils.pathUtils import isServerPath
+from utils.pathUtils import getPathType, PathType
 from utils.rsyncWrapper import rsync
 from configs.availTypesConfig import availTypes
 from configs.availTypesConfig import modelClassDict
@@ -20,12 +20,12 @@ class SaveImageCollection(QtCore.QRunnable):
     
     @QtCore.pyqtSlot()
     def run(self):
-        # TODO: check if the path is to the server, if yes, save model to a temp place and then upload it.
+        # check if the path is to the server, if yes, save model to a temp place and then upload it.
         # If modelToSave is a cloud type, and the path is also a cloud path, copy directly on the server side.
-        if not isServerPath(self.savePath):
+        if getPathType(self.savePath) == PathType.Local:
             flag = modelClassDict[self.targetType].saveModel(self.modelToSave, self.savePath)
             self.signals.finished.emit(flag)
-        else:
+        elif getPathType(self.savePath) == PathType.Server:
             saveName = os.path.basename(self.savePath.split(':')[1])
             tmp_savePath = os.path.join('.', 'tmp', saveName)
             flag = modelClassDict[self.targetType].saveModel(self.modelToSave, tmp_savePath)
@@ -34,13 +34,14 @@ class SaveImageCollection(QtCore.QRunnable):
             else:
                 flag_upload = self.upload(tmp_savePath, self.savePath)
                 self.signals.finished.emit(flag_upload)
+        else:
+            self.signals.finished.emit(False)
 
     def upload(self, localPath, serverPath):
         if self.targetType == 'folder' and not localPath.endswith('/'):
             localPath = localPath + '/'
 
-        cmd = f'rsync -a --delete {localPath} {serverPath}'
-        return rsync(cmd)
+        return rsync(localPath, serverPath)
 
     @staticmethod
     def save(modelToSave, savePath, targetType, threadpool, callback):

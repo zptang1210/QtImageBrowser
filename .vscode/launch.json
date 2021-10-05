@@ -8,7 +8,9 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/ImageBrowser.py",
+            "program": "${file}",
+            //"program": "${workspaceFolder}/ImageBrowser.py",
+            "env": {"PYTHONPATH": "${workspaceRoot}"},
             "console": "integratedTerminal"
         }
     ]

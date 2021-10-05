@@ -7,7 +7,7 @@ from main.ImageCollectionSaveDialog import ImageCollectionSaveDialog
 from main.ImageCollectionOpenDialog import ImageCollectionOpenDialog
 from models.ImageCollectionCloudModel import ImageCollectionCloudModel
 from utils.SaveImageCollection import SaveImageCollection
-from utils.pathUtils import isServerPath, normalizePath
+from utils.pathUtils import getPathType, normalizePath, PathType
 from configs.availTypesConfig import availTypes
 from configs.availTypesConfig import modelClassDict
 
@@ -61,11 +61,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if path not in self.imageCollectionModels.keys():
             try:
-                if isServerPath(path):
+                if getPathType(path) == PathType.Server:
                     model = ImageCollectionCloudModel(path, name, type, parentModel=parentModel)
-                else:
+                elif getPathType(path) == PathType.Local:
                     modelClass = modelClassDict[type]
                     model = modelClass(path, name, parentModel=parentModel)
+                else:
+                    raise ValueError('invalid path.')
             except:
                 return False, None
             else:

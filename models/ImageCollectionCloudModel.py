@@ -1,5 +1,5 @@
 import os
-from utils.pathUtils import normalizePath
+from utils.pathUtils import normalizePath, getPathType, PathType
 from models.ImageCollectionModel import ImageCollectionModel
 from utils.rsyncWrapper import rsync
 from configs.availTypesConfig import availTypes
@@ -11,6 +11,7 @@ class ImageCollectionCloudModel(ImageCollectionModel):
     def __init__(self, path, name, type, localPath=None, preload=True, parentModel=None):
         super().__init__()
         self.path = path # server path
+        assert getPathType(self.path) == PathType.Server
         self.name = name
         self.type = type
         assert self.type in availTypes
@@ -20,17 +21,21 @@ class ImageCollectionCloudModel(ImageCollectionModel):
             self.localPath = os.path.join(ImageCollectionCloudModel.DEFAULT_LOCAL_ROOT_PATH, name)
         else:
             self.localPath = localPath
+        assert getPathType(self.localPath) == PathType.Local
         self.localPath = normalizePath(self.localPath)
 
         self.serverAddr = self.path.split(':')[0]
         
         if preload:
             flag = self.load(self.path, self.localPath)
-            self.loaded = True
             if flag == False:
                 raise RuntimeError('Unable to load the image collection from the server.')
-        
+
             self.model = self.getModel()
+            if self.model is None:
+                raise RuntimeError('Unable to create a mapping image model.')
+            else:
+                self.loaded = True
         else:
             self.loaded = False
             self.model = None
@@ -40,8 +45,7 @@ class ImageCollectionCloudModel(ImageCollectionModel):
         if self.type == 'folder' and not serverPath.endswith('/'):
             serverPath = serverPath + '/' # copy all files in the folder to the local path, exluding the folder structure
 
-        cmd = f'rsync -a --delete {serverPath} {localPath}'      #rsync -av --delete xxx@gypsum.cs.umass.edu:~/testData /Users/xxx/Desktop/tmp
-        flag = rsync(cmd)
+        flag = rsync(serverPath, localPath)
         if flag: self.loaded = True
         else: self.loaded = False
 
@@ -49,9 +53,13 @@ class ImageCollectionCloudModel(ImageCollectionModel):
 
 
     def getModel(self):
-        modelClass = modelClassDict[self.type]
-        model = modelClass(self.localPath, self.name, parentModel=self.parentModel)
-        return model
+        try:
+            modelClass = modelClassDict[self.type]
+            model = modelClass(self.localPath, self.name, parentModel=self.parentModel)
+        except:
+            return None
+        else:
+            return model
         
     def length(self):
         assert self.loaded
@@ -86,6 +94,4 @@ class ImageCollectionCloudModel(ImageCollectionModel):
         raise NotImplemented()
 
 
-if __name__ == '__main__':
-    model = ImageCollectionCloudModel('zhipengtang@gypsum.cs.umass.edu:~/testData/batch_00002_0', 'testData')
     

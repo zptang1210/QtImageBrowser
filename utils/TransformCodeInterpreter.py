@@ -116,7 +116,11 @@ class TransformCodeInterpreter:
     def run(self, code, model, newCollectionName, rootSavePath=None):
         if rootSavePath is None:
             rootSavePath = os.path.join('.', 'tmp')
-        rootSavePath = normalizePath(rootSavePath)
+        try:
+            rootSavePath = normalizePath(rootSavePath)
+        except:
+            print('invalid rootSavePath.')
+            return None
 
         for i, (command, modulePath, className, argsList) in enumerate(code):
             module = importlib.import_module(modulePath)
@@ -182,5 +186,10 @@ class TransformCodeInterpreter:
         if flag == 0:
             return None
         else:
-            newModel = ImageCollectionCloudModel(newServerPath, newName, 'folder', preload=False)
-            return newModel
+            try:
+                newModel = ImageCollectionCloudModel(newServerPath, newName, 'folder', preload=False)
+            except:
+                print('error occurs when creating a cloud model.')
+                return None
+            else:
+                return newModel

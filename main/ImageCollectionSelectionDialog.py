@@ -1,6 +1,5 @@
 from PyQt5 import QtWidgets
 from utils.RemoteServerManager import remoteServerManager
-from utils.pathUtils import normalizePath
 from configs.availTypesConfig import availTypes
 
 class ImageCollectionSelectionDialog(QtWidgets.QDialog):
@@ -35,11 +34,15 @@ class ImageCollectionSelectionDialog(QtWidgets.QDialog):
         self.locationList.extend(remoteServerManager.getServerNames())
         self.locComboBox.addItems(self.locationList)
         self.locComboBox.currentIndexChanged.connect(self.locComboBoxIdxChanged)
+
         self.layout.addWidget(self.locComboBox, 2, 1, 1, 1)
 
         self.fileDialogButton = QtWidgets.QPushButton('select')
         self.fileDialogButton.clicked.connect(self.fileDialogButtonClicked)
         self.layout.addWidget(self.fileDialogButton, 2, 2, 1, 1)
+        
+        self.fileDialogButton.setEnabled(True)
+        self.locComboBox.setCurrentIndex(0)
 
         self.layout.addWidget(QtWidgets.QLabel('Input path: '), 3, 0, 1, 1)
         self.pathLineEdit = QtWidgets.QLineEdit(self)

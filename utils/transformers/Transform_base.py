@@ -22,7 +22,11 @@ class Transform_base:
 
     def run(self, model, argsList, rootSavePath, saveName=None):
         if saveName is None: saveName = 'tmp_' + str(time.time())
-        savePath = normalizePath(os.path.join(rootSavePath, saveName))
+        try:
+            savePath = normalizePath(os.path.join(rootSavePath, saveName))
+        except:
+            print('invalid rootSavePath.')
+            return None
 
         try:
             self.argParser = self.getArgParser()
@@ -54,8 +58,14 @@ class Transform_base:
             print(e, '\n', traceback.format_exc())
             shutil.rmtree(savePath)
             return None
-
-        return ImageCollectionFolderModel(savePath, saveName)
+        
+        try:
+            newModel = ImageCollectionFolderModel(savePath, saveName)
+        except:
+            print('Failed to create a new model to hold results.')
+            return None
+        else:
+            return newModel 
 
     @classmethod
     def getCommand(cls):

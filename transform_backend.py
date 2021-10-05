@@ -19,8 +19,12 @@ def argsParser():
     return args
 
 def checkArgs(args):
-    args.model_path = normalizePath(os.path.expanduser(args.model_path))
-    args.script_file = normalizePath(os.path.expanduser(args.script_file))
+    try:
+        args.model_path = normalizePath(os.path.expanduser(args.model_path))
+        args.script_file = normalizePath(os.path.expanduser(args.script_file))
+    except:
+        print('invalid path for model or script.', file=sys.stderr)
+        return False
     
     if not os.path.exists(args.model_path):
         print('model_path not exists', file=sys.stderr)

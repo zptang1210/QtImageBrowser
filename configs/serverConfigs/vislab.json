@@ -1,6 +1,6 @@
 {
     "server": "gypsum.cs.umass.edu",
-    "username": "videolab",
+    "username": "vislab",
     "auth_method": "password",
     "processor_path": "/home/zhipengtang/.imageBrowserProcessor/QtImageBrowser",
     "template_path": "./configs/serverConfigs/gypsum_template.txt"
