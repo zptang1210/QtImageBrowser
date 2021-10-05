@@ -1,4 +1,5 @@
 from PyQt5 import QtWidgets
+from utils.RemoteServerManager import remoteServerManager
 from utils.pathUtils import normalizePath
 from configs.availTypesConfig import availTypes
 
@@ -28,17 +29,31 @@ class ImageCollectionSelectionDialog(QtWidgets.QDialog):
         self.nameLineEdit = QtWidgets.QLineEdit(self)
         self.layout.addWidget(self.nameLineEdit, 1, 1, 1, 2)
 
-        self.layout.addWidget(QtWidgets.QLabel('Input path: '), 2, 0, 1, 1)
-        self.pathLineEdit = QtWidgets.QLineEdit(self)
-        self.layout.addWidget(self.pathLineEdit, 2, 1, 1, 1)
-        
-        self.fileDialogButton = QtWidgets.QPushButton('Select')
+        self.layout.addWidget(QtWidgets.QLabel('Image location: '), 2, 0, 1, 1)
+        self.locComboBox = QtWidgets.QComboBox(self)
+        self.locationList = ['']
+        self.locationList.extend(remoteServerManager.getServerNames())
+        self.locComboBox.addItems(self.locationList)
+        self.locComboBox.currentIndexChanged.connect(self.locComboBoxIdxChanged)
+        self.layout.addWidget(self.locComboBox, 2, 1, 1, 1)
+
+        self.fileDialogButton = QtWidgets.QPushButton('select')
         self.fileDialogButton.clicked.connect(self.fileDialogButtonClicked)
         self.layout.addWidget(self.fileDialogButton, 2, 2, 1, 1)
 
-        self.layout.addWidget(self.buttonBox, 3, 1, 1, 2)
+        self.layout.addWidget(QtWidgets.QLabel('Input path: '), 3, 0, 1, 1)
+        self.pathLineEdit = QtWidgets.QLineEdit(self)
+        self.layout.addWidget(self.pathLineEdit, 3, 1, 1, 2)
+
+        self.layout.addWidget(self.buttonBox, 4, 1, 1, 2)
 
         self.setLayout(self.layout)
+
+    def locComboBoxIdxChanged(self, idx):
+        if idx == 0: # Path is probably for local machine, enable select button (path can also be in scp format)
+            self.fileDialogButton.setEnabled(True)
+        else:
+            self.fileDialogButton.setEnabled(False)
 
     def buttonOKClicked(self):
         self.accept()
@@ -47,11 +62,15 @@ class ImageCollectionSelectionDialog(QtWidgets.QDialog):
         pass
 
     def getPath(self):
-        path = self.pathLineEdit.text().strip()
-        return normalizePath(path)
+        path = self.pathLineEdit.text()
+        return path
+
+    def setPath(self, text): # the path you set must be of full format
+        self.pathLineEdit.setText(text)
+        self.locComboBox.setCurrentIndex(0)
 
     def getName(self):
-        return self.nameLineEdit.text().strip()
+        return self.nameLineEdit.text()
 
     def setName(self, text):
         self.nameLineEdit.setText(text)
@@ -60,6 +79,12 @@ class ImageCollectionSelectionDialog(QtWidgets.QDialog):
         selectedType = self.typeComboBox.currentText()
         assert selectedType in availTypes
         return selectedType
+
+    def getLocationIdx(self):
+        return self.locComboBox.currentIndex()
+
+    def getLocationName(self):
+        return self.locComboBox.currentText()
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])

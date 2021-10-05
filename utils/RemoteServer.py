@@ -103,5 +103,5 @@ class RemoteServer:
 
 
 if __name__ == '__main__':
-    server = RemoteServer('./configs/serverConfigs/gypsum.json')
+    server = RemoteServer('./configs/serverConfigs/mygypsum.json')
     print(server.login())
