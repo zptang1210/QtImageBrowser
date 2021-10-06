@@ -33,7 +33,7 @@ def rsync(srcPath, destPath):
         return False
 
     child.sendline(passwd)
-    i = child.expect(["Permission denied", 'failed', 'error', EOF, TIMEOUT], timeout=200)
+    i = child.expect(["Permission denied", '[Ff]ailed', '[Ee]rror', EOF, TIMEOUT], timeout=200)
     # print(i, child.before, child.after)
     if i == 0:
         print('rsync Permission denied')

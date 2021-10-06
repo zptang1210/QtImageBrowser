@@ -6,3 +6,4 @@ testData/
 tmp/
 resources/deprecated/
 utils/transformers/optical_flow/thirdparty/
+log/

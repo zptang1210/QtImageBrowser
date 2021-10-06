@@ -194,7 +194,7 @@ class TransformCodeInterpreter:
             
             if modelLocalPath is None: raise ValueError('The model to transform is not loaded.')
 
-            tempModelName = os.path.basename(modelLocalPath)
+            tempModelName = os.path.basename(modelLocalPath) + '_' + str(time.time())
             tempModelServerPath = os.path.join(server.get_processor_path(), 'tmp', tempModelName)
             tempModelServerFullPath = server.get_username() + '@' + server.get_server() + ':' + tempModelServerPath
             flag = SaveImageCollection.upload(modelLocalPath, tempModelServerFullPath, modelType)

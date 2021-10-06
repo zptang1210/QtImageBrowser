@@ -1,5 +1,4 @@
 import json
-import traceback
 from utils.PasswdManager import passwdManager
 from pexpect import pxssh
 
@@ -20,6 +19,7 @@ class RemoteServer:
             self.script = None
 
     def login(self):
+        print('pxssh is trying to log into the server.')
         try:
             self.server = pxssh.pxssh()
             passwd = passwdManager.getPasswd((self.config['server'], self.config['username']))
@@ -34,6 +34,7 @@ class RemoteServer:
             return True
 
     def logout(self):
+        print('pxssh is trying to logout from the server.')
         try:
             if self.server is not None and self.connected:
                 self.server.logout()
@@ -45,13 +46,14 @@ class RemoteServer:
             self.connected = False
             return True
 
-    def runTemplateScript(self, replace, expectRe, timeout=500):
+    def runTemplateScript(self, replace, expectRe, timeout=60):
         if self.script is None or self.connected == False or self.server is None:
-            print('failed the initial check for script run.')
+            print('failed the initial check before running the script.')
             return None
 
-        try:
-            for line in self.script:
+        result = None
+        for line in self.script:
+            try:
                 line = line.strip()
                 if line == '[RUN]':
                     line = replace['[RUN]']
@@ -68,12 +70,18 @@ class RemoteServer:
                 if not keyLine:
                     self.server.prompt(timeout=timeout)
                 else:
-                    self.server.expect(expectRe, timeout=timeout)
-                    result = self.server.after.decode()
+                    i = self.server.expect([expectRe, '[Ee]rror', '[Ff]ailed', '[Ee]xception'], timeout=timeout)
+                    if i != 0:
+                        raise RuntimeError('failed to run [RUN].')
+                    else:
+                        result = self.server.after.decode()
+
                 # print('debug info:', self.server.before, self.server.after)
-        except Exception as e:
-            print('error occurs during running the script')
-            # print(e, '\n', traceback.format_exc())
+            except Exception as e:
+                print('error occurs during running the command: ', line, e)
+
+        if result is None:
+            print('running the script failed')
             return None
         else:
             return result
