@@ -66,14 +66,14 @@ class RemoteServer:
                 
                 self.server.sendline(line)
                 if not keyLine:
-                    self.server.prompt(timeout=(timeout//2))
+                    self.server.prompt(timeout=timeout)
                 else:
                     self.server.expect(expectRe, timeout=timeout)
                     result = self.server.after.decode()
                 # print('debug info:', self.server.before, self.server.after)
         except Exception as e:
             print('error occurs during running the script')
-            print(e, '\n', traceback.format_exc())
+            # print(e, '\n', traceback.format_exc())
             return None
         else:
             return result

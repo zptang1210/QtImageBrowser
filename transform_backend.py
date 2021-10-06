@@ -1,4 +1,5 @@
 import os, sys
+os.chdir(os.path.dirname(__file__))
 import time
 import argparse
 from utils.pathUtils import normalizePath
@@ -18,22 +19,22 @@ def argsParser():
     # print(args)
     return args
 
-def checkArgs(args):
+def checkArgs(args, output=sys.stderr):
     try:
         args.model_path = normalizePath(os.path.expanduser(args.model_path))
         args.script_file = normalizePath(os.path.expanduser(args.script_file))
     except:
-        print('invalid path for model or script.', file=sys.stderr)
+        print('invalid path for model or script.', file=output)
         return False
     
     if not os.path.exists(args.model_path):
-        print('model_path not exists', file=sys.stderr)
+        print('model_path not exists', file=output)
         return False
     if args.model_type not in availTypes:
-        print('invalid model_type', file=sys.stderr)
+        print('invalid model_type', file=output)
         return False
     if not os.path.exists(args.script_file):
-        print('script not exists', file=sys.stderr)
+        print('script not exists', file=output)
         return False
     return True
 
@@ -52,31 +53,30 @@ def runScript(rawCode, model, newCollectionName, rootSavePath):
     model = interpreter.parseAndRun(rawCode, model, newCollectionName, rootSavePath=rootSavePath)
     return model
 
-def runTransform():
-    os.chdir(os.path.dirname(__file__))
+def runTransform(output=sys.stderr):
     args = argsParser()
 
-    flag = checkArgs(args)
+    flag = checkArgs(args, output=output)
     if not flag: 
-        print('invalid args', file=sys.stderr)
+        print('invalid args', file=output)
         return False, None, None
 
     model = createModel(args.model_path,  str(time.time()), args.model_type)
     if model is None:
-        print('failed to load the model', file=sys.stderr)
+        print('failed to load the model', file=output)
         return False, None, None
     
     try:
         with open(args.script_file, 'r') as fin:
             rawCode = fin.read()
     except:
-        print('failed to read the script', file=sys.stderr)
+        print('failed to read the script', file=output)
         return False, None, None
 
     rootSavePath = normalizePath(os.path.join(os.path.dirname(__file__), 'tmp'))
     model = runScript(rawCode, model, args.result_name, rootSavePath)
     if model is None:
-        print('failed to run the script', file=sys.stderr)
+        print('failed to run the script', file=output)
         return False, None, None
     
     return True, model.path, model.name
@@ -85,12 +85,11 @@ def runTransform():
 
 if __name__ == '__main__':
     # python transform.py --model_path=/home/zhipengtang/testData/batch_00002_0 --model_type=folder --script_file=./script.txt --result_name=tmp
-    flag, path, name = runTransform()
-    print('transform_finished', int(flag), path, name)
-    
+    logFileName = 'log_' + '_'.join(time.ctime().split()) + '.txt'
+    with open(os.path.join('.', 'log', logFileName), 'w') as fout:
+        fout.write(' '. join(sys.argv) + '\n')
+        flag, path, name = runTransform(output=fout)
+        print('transform_finished', int(flag), path, name, file=fout)
 
-    
-
-
-
+    print('transform_finished', int(flag), path, name, file=sys.stdout)
     

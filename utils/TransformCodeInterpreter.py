@@ -196,8 +196,8 @@ class TransformCodeInterpreter:
 
             tempModelName = os.path.basename(modelLocalPath)
             tempModelServerPath = os.path.join(server.get_processor_path(), 'tmp', tempModelName)
-            tempModelServerPath = server.get_username() + '@' + server.get_server() + ':' + tempModelServerPath
-            flag = SaveImageCollection.upload(modelLocalPath, tempModelServerPath, modelType)
+            tempModelServerFullPath = server.get_username() + '@' + server.get_server() + ':' + tempModelServerPath
+            flag = SaveImageCollection.upload(modelLocalPath, tempModelServerFullPath, modelType)
             if not flag:
                 raise RuntimeError('model uploading failed.')
         except:
