@@ -1,28 +1,32 @@
 import json
 import traceback
-import utils.PasswdManager as PasswdManager
+from utils.PasswdManager import passwdManager
 from pexpect import pxssh
 
 class RemoteServer:
-    def __init__(self, configFile):
+    def __init__(self, config):
         self.config = None
         self.script = None
         self.server = None
         self.connected = False
 
-        with open(configFile, 'r') as fin:
-            self.config = json.load(fin)
+        self.config = config
         
-        with open(self.config['template_path'], 'r') as fin:
-            self.script = fin.readlines()
+        try:
+            with open(self.config['template_path'], 'r') as fin:
+                self.script = fin.readlines()
+        except:
+            print('loading template file failed.')
+            self.script = None
 
     def login(self):
         try:
             self.server = pxssh.pxssh()
-            self.server.login(server=self.config['server'], username=self.config['username'], password=PasswdManager.passwdManager.getPass(), sync_multiplier=5)
+            passwd = passwdManager.getPasswd((self.config['server'], self.config['username']))
+            self.server.login(server=self.config['server'], username=self.config['username'], password=passwd, sync_multiplier=5)
         except pxssh.ExceptionPexpect as e:
             print('pxssh failed.', e)
-            PasswdManager.passwdManager.currentPasswdIsInvalid()
+            passwdManager.invalidateStoredPasswd((self.config['server'], self.config['username']))
             self.connected = False
             return False
         else:
@@ -103,5 +107,8 @@ class RemoteServer:
 
 
 if __name__ == '__main__':
-    server = RemoteServer('./configs/serverConfigs/mygypsum.json')
+    with open('./configs/serverConfigs/mygypsum.json', 'r') as fin:
+        config = json.load(fin)
+
+    server = RemoteServer(config)
     print(server.login())

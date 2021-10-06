@@ -31,7 +31,7 @@ class ImageCollectionSelectionDialog(QtWidgets.QDialog):
         self.layout.addWidget(QtWidgets.QLabel('Image location: '), 2, 0, 1, 1)
         self.locComboBox = QtWidgets.QComboBox(self)
         self.locationList = ['']
-        self.locationList.extend(remoteServerManager.getServerNames())
+        self.locationList.extend(remoteServerManager.getListOfServers())
         self.locComboBox.addItems(self.locationList)
         self.locComboBox.currentIndexChanged.connect(self.locComboBoxIdxChanged)
 

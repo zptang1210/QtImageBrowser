@@ -18,15 +18,15 @@ class RemoteServerManager:
                 assert (config['processor_path'] is None and config['template_path'] is None) or (config['processor_path'] is not None and config['template_path'] is not None)
                 allowProcessing = False if config['processor_path'] is None else True
 
-                self.servers[name] = {'config': config, 'path': path, 'allowProcessing': allowProcessing, 'server': None}
+                self.servers[name] = {'config': config, 'path': path, 'allowProcessing': allowProcessing}
         except Exception as e:
             print('Error occurs when loading server configurations...')
             raise e
             
-    def getServerNames(self):
+    def getListOfServers(self):
         return list(self.servers.keys())
 
-    def getServerAllowingProcessingNames(self):
+    def getListOfServersAllowingProcessing(self):
         nameList = []
         for name in self.servers.keys():
             if self.servers[name]['allowProcessing']:
@@ -40,6 +40,12 @@ class RemoteServerManager:
         else:
             raise ValueError('invalid server name.')
 
+    def getConfig(self, serverName):
+        if serverName in self.servers.keys():
+            return self.servers[serverName]['config']
+        else:
+            raise ValueError('invalid server name.')
+
 
 
 remoteServerManager = RemoteServerManager()
@@ -47,5 +53,5 @@ remoteServerManager = RemoteServerManager()
 
 
 if __name__ == "__main__":
-    print(remoteServerManager.getServerAllowingProcessingNames())
-    print(remoteServerManager.getServerNames())
+    print(remoteServerManager.getListOfServersAllowingProcessing())
+    print(remoteServerManager.getListOfServers())

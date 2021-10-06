@@ -32,13 +32,14 @@ class SaveImageCollection(QtCore.QRunnable):
             if not flag:
                 self.signals.finished.emit(flag)
             else:
-                flag_upload = self.upload(tmp_savePath, self.savePath)
+                flag_upload = SaveImageCollection.upload(tmp_savePath, self.savePath, self.targetType)
                 self.signals.finished.emit(flag_upload)
         else:
             self.signals.finished.emit(False)
 
-    def upload(self, localPath, serverPath):
-        if self.targetType == 'folder' and not localPath.endswith('/'):
+    @staticmethod
+    def upload(localPath, serverPath, fileType):
+        if fileType == 'folder' and not localPath.endswith('/'):
             localPath = localPath + '/'
 
         return rsync(localPath, serverPath)

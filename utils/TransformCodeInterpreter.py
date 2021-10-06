@@ -4,10 +4,13 @@ import json
 import importlib
 import re
 import traceback
+
+from utils.SaveImageCollection import SaveImageCollection
 from utils.pathUtils import normalizePath
 from utils.RemoteServer import RemoteServer
 from utils.strToRaw import str_to_raw
 from models.ImageCollectionCloudModel import ImageCollectionCloudModel
+from configs.availTypesConfig import modelNameDict
 
 class TransformCodeInterpreter:
     def __init__(self):
@@ -19,8 +22,6 @@ class TransformCodeInterpreter:
         with open(jsonPath, 'r') as fin:
             self.registeredInteractCmds = json.load(fin)
 
-        with open('./configs/serverConfigs/registeredServerConfig.json', 'r') as fin:
-            self.serverConfig = json.load(fin)
 
     def parseAndRun(self, rawCode, model, newCollectionName, rootSavePath=None):
         code, macros = self.parse(rawCode)
@@ -33,6 +34,7 @@ class TransformCodeInterpreter:
 
         model = self.run(code, model, newCollectionName, rootSavePath=rootSavePath)
         return model
+
 
     def parse(self, rawCode):
         code = []
@@ -63,6 +65,7 @@ class TransformCodeInterpreter:
         if len(code) == 0: return None, None # avoid empty script
         return code, macros
 
+
     def preprocess(self, model, code, macros):
         if len(macros) == 0: return code # no macro found
 
@@ -84,6 +87,7 @@ class TransformCodeInterpreter:
 
             newCode.append((command, modulePath, className, newArgsList))
         return newCode
+
 
     def runInteractiveCmd(self, model, cmd):
         modulePath, className = self.registeredInteractCmds.get(cmd, (None, None))
@@ -109,9 +113,11 @@ class TransformCodeInterpreter:
             else:
                 return None
 
+
     def getModule(self, cmd):
         modulePath, className = self.registeredModules.get(cmd, (None, None))
         return modulePath, className
+
 
     def run(self, code, model, newCollectionName, rootSavePath=None):
         if rootSavePath is None:
@@ -134,6 +140,7 @@ class TransformCodeInterpreter:
         
         return model
 
+
     def getScriptWoMacros(self, rawCode, model):
         parsedCode, macros = self.parse(rawCode)
         if parsedCode is None:
@@ -150,43 +157,89 @@ class TransformCodeInterpreter:
         
         return newScript
 
-    def parseAndRunRemotely(self, rawCode, model, newCollectionName):
-        server = RemoteServer(self.serverConfig['config_file'])
+
+    def parseAndRunRemotely(self, rawCode, model, newCollectionName, serverConfig):
+        server = RemoteServer(serverConfig)
         flag = server.login()
         if not flag:
             return None
+
+        # scriptPath
         randomScriptName = f'script_{time.time()}.txt'
         scriptPath = os.path.join(server.get_processor_path(), 'tmp', 'scripts', randomScriptName)
 
+        # [GENSCRIPT]
         genscriptCode = f'echo -e "{str_to_raw(rawCode)}" > {scriptPath}'
         print('[GENSCRIPT]', genscriptCode)
 
+        # processorFile
         processorFile = os.path.join(server.get_processor_path(), 'transform_backend.py')
-        modelPath = model.getRootPath().split(':')[1]
-        modelType = model.type
+
+        # model_path and model_type
+        # TODO: upload the local model to the corresponding server, and use the path on the server to run the script
+        # if the model is a cloud model, use localPath instead of the path.
+        try:
+            modelType = None
+            if isinstance(model, ImageCollectionCloudModel):
+                modelType = model.type
+            else:
+                modelType = modelNameDict[type(model)]
+
+            modelLocalPath = None
+            if isinstance(model, ImageCollectionCloudModel):
+                if model.loaded:
+                    modelLocalPath = model.localPath
+            else:
+                modelLocalPath = model.path
+            
+            if modelLocalPath is None: raise ValueError('The model to transform is not loaded.')
+
+            tempModelName = os.path.basename(modelLocalPath)
+            tempModelServerPath = os.path.join(server.get_processor_path(), 'tmp', tempModelName)
+            tempModelServerPath = server.get_username() + '@' + server.get_server() + ':' + tempModelServerPath
+            flag = SaveImageCollection.upload(modelLocalPath, tempModelServerPath, modelType)
+            if not flag:
+                raise RuntimeError('model uploading failed.')
+        except:
+            print('model uploading failed.')
+            return None
+        else:
+            print('model uploading succeeded.')
+            modelPath = tempModelServerPath
+
+        # modelPath = model.getRootPath().split(':')[1]
+        # modelType = model.type
+
+        # resultName
         resultName = newCollectionName
+
+        # [RUN]
         runCode = f'python {processorFile} --model_path={modelPath} --model_type={modelType} --script_file={scriptPath} --result_name={resultName}'
         print('[RUN]', runCode)
-
+        
+        # run the generated script on the server
         replace = {'[GENSCRIPT]': genscriptCode, '[RUN]': runCode}
         expectRe = 'transform_finished (\d) (.*) (.*)'
         result = server.runTemplateScript(replace, expectRe)
         print('transform result:', result)
-        if result is None:
+        if result is None: # running failed
             return None
 
+        # parse result
         pattern = re.compile(expectRe)
         m = pattern.match(result)
         flag = int(m.group(1).strip())
         newPath = m.group(2).strip()
         newName = m.group(3).strip()
         
+        # organize the result as a model and return it.
         newServerPath = f'{server.get_username()}@{server.get_server()}:{newPath}'
         
         if flag == 0:
             return None
         else:
             try:
+                # don't preload it to save time since it will be load when opening it to the main window
                 newModel = ImageCollectionCloudModel(newServerPath, newName, 'folder', preload=False)
             except:
                 print('error occurs when creating a cloud model.')

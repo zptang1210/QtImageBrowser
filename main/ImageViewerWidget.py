@@ -161,10 +161,11 @@ class ImageViewerWidget(QtWidgets.QWidget):
             self.transformDlg = TransformDialog(self)
 
         if self.transformDlg.exec_():
-            newCollectionName = self.transformDlg.nameLineEdit.text().strip()
-            code = self.transformDlg.transformCode.toPlainText()
+            newCollectionName = self.transformDlg.getName()
+            code = self.transformDlg.getCode()
+            processingSrv = self.transformDlg.getSelectedProcessingServer()
 
-            TransformCodeParseAndRunThread.parseAndRun(code, self.model, newCollectionName, self.threadpool, self.transformFinishedCallback)
+            TransformCodeParseAndRunThread.parseAndRun(code, self.model, newCollectionName, processingSrv, self.threadpool, self.transformFinishedCallback)
         else:
             self.transformDlg = None
             return

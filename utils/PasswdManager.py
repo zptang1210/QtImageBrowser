@@ -5,7 +5,7 @@ class PasswdManager:
     def __init__(self):
         self.passwds = {}
 
-    def getPasswd(self, srv):
+    def getPasswd(self, srv): # srv = (serverName, userName)
         passwd = self.passwds.get(srv, None)
         if passwd is not None:
             return passwd
