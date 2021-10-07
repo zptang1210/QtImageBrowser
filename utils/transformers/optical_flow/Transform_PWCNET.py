@@ -1,41 +1,30 @@
 import numpy as np
 import torch
-from utils.transformers.optical_flow.Transform_opticalFlowBase import Transform_opticalFlowBase
-import flow_vis
+from utils.transformers.optical_flow.Transform_opticalFlowFramework import Transform_opticalFlowFramework
 from .thirdparty.pytorch_pwc.run import estimate
 
-class Transform_PWCNET(Transform_opticalFlowBase):
+class Transform_PWCNET(Transform_opticalFlowFramework):
     command = 'pwcnet'
 
     def __init__(self):
         super().__init__()
 
     def getArgParser(self):
-        None
+        return super().getArgParser()
 
-    def processImageCollection(self, model, args):
-        imgNum = model.length()
-        assert imgNum > 0
+    def initOpticalFlowAlgorithm(self, model, args):
+        pass
 
-        for i in range(imgNum-1):
-            firstImg, firstImgName = model.get(i)
-            secondImg, secondImgName = model.get(i+1)
-            print(f'- processing {i}/{imgNum-1} - {firstImgName} -> {secondImgName}')
+    def computeOpticalFlow(self, img1, img2):
+        img1 = img1[:, :, ::-1].transpose(2, 0, 1).astype(np.float32) * (1.0 / 255.0)
+        img2 = img2[:, :, ::-1].transpose(2, 0, 1).astype(np.float32) * (1.0 / 255.0)
 
-            firstImg = firstImg[:, :, ::-1].transpose(2, 0, 1).astype(np.float32) * (1.0 / 255.0)
-            secondImg = secondImg[:, :, ::-1].transpose(2, 0, 1).astype(np.float32) * (1.0 / 255.0)
+        tensor1 = torch.FloatTensor(np.ascontiguousarray(img1))
+        tensor2 = torch.FloatTensor(np.ascontiguousarray(img2))
 
-            firstTensor = torch.FloatTensor(np.ascontiguousarray(firstImg))
-            secondTensor = torch.FloatTensor(np.ascontiguousarray(secondImg))
+        outputTensor = estimate(tensor1, tensor2) # channel, height, width
 
-            outputTensor = estimate(firstTensor, secondTensor) # channel, height, width
+        outputArray = outputTensor.numpy().transpose(1, 2, 0).astype(np.float32)
 
-            outputArray = outputTensor.numpy().transpose(1, 2, 0).astype(np.float32)
-            
-            # vis = flow_vis.flow_to_color(outputArray)
-            vis = self.flowToImage(outputArray)
-
-            yield vis, firstImgName
-
-
-
+        return outputArray
+        

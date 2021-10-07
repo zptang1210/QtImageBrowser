@@ -1,14 +1,12 @@
 import sys
 sys.path.append('./utils/transformers/optical_flow/thirdparty/RAFT/core')
-import argparse
-from .thirdparty.RAFT.core.utils.utils import InputPadder
-import torch
 import numpy as np
-from .thirdparty.RAFT.core.utils import flow_viz
-from utils.transformers.optical_flow.Transform_opticalFlowBase import Transform_opticalFlowBase
+import torch
+from .thirdparty.RAFT.core.utils.utils import InputPadder
 from .thirdparty.RAFT.core.raft import RAFT
+from utils.transformers.optical_flow.Transform_opticalFlowFramework import Transform_opticalFlowFramework
 
-class Transform_RAFT(Transform_opticalFlowBase):
+class Transform_RAFT(Transform_opticalFlowFramework):
     command = 'raft'
 
     def __init__(self):
@@ -20,14 +18,8 @@ class Transform_RAFT(Transform_opticalFlowBase):
         img_tensor = torch.from_numpy(img_).permute(2, 0, 1).float()
         return img_tensor[None].to(self.DEVICE)
 
-    def viz(self, flo):
-        flo = flo[0].permute(1,2,0).cpu().numpy()
-        flo_img = flow_viz.flow_to_image(flo)
-        # flo_img = flo_img[:, :, [2, 1, 0]]
-        return flo_img
-
     def getArgParser(self):
-        parser = argparse.ArgumentParser()
+        parser = super().getArgParser()
         parser.add_argument('--model', default='./utils/transformers/optical_flow/thirdparty/RAFT/models/raft-things.pth', help="restore checkpoint")
         # parser.add_argument('--path', help="dataset for evaluation")
         parser.add_argument('--small', action='store_true', help='use small model')
@@ -35,34 +27,23 @@ class Transform_RAFT(Transform_opticalFlowBase):
         parser.add_argument('--alternate_corr', action='store_true', help='use efficent correlation implementation')
         return parser
 
-    def processImageCollection(self, model, args):
-        imgCol = model # change a name to avoid confusion
-
+    def initOpticalFlowAlgorithm(self, model, args):
         raftmodel = torch.nn.DataParallel(RAFT(args))
         raftmodel.load_state_dict(torch.load(args.model))
 
-        raftmodel = raftmodel.module
-        raftmodel.to(self.DEVICE)
-        raftmodel.eval()
+        self.raftmodel = raftmodel.module
+        self.raftmodel.to(self.DEVICE)
+        self.raftmodel.eval()
 
-        imgNum = imgCol.length()
-        with torch.no_grad():
-            for i in range(imgNum-1):
-                img1, img1_name = imgCol.get(i)
-                img2, img2_name = imgCol.get(i+1)
-                print(f'- processing {i}/{imgNum-1} - {img1_name} -> {img2_name}')
+    def computeOpticalFlow(self, img1, img2):
+        img1 = self.load_image(img1)
+        img2 = self.load_image(img2)
 
-                img1 = self.load_image(img1)
-                img2 = self.load_image(img2)
+        padder = InputPadder(img1.shape)
+        img1, img2 = padder.pad(img1, img2)
 
-                padder = InputPadder(img1.shape)
-                img1, img2 = padder.pad(img1, img2)
+        flow_low, flow_up = self.raftmodel(img1, img2, iters=20, test_mode=True)
 
-                flow_low, flow_up = raftmodel(img1, img2, iters=20, test_mode=True)
-                
-                # flo_img = self.viz(flow_up)
+        flo = flow_up[0].permute(1,2,0).cpu().numpy()
 
-                flo = flow_up[0].permute(1,2,0).cpu().numpy()
-                flo_img = self.flowToImage(flo)
-
-                yield flo_img, img1_name
+        return flo
