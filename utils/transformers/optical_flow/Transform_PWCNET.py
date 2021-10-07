@@ -1,10 +1,10 @@
 import numpy as np
 import torch
-from utils.transformers.Transform_base import Transform_base
+from utils.transformers.optical_flow.Transform_opticalFlowBase import Transform_opticalFlowBase
 import flow_vis
 from .thirdparty.pytorch_pwc.run import estimate
 
-class Transform_PWCNET(Transform_base):
+class Transform_PWCNET(Transform_opticalFlowBase):
     command = 'pwcnet'
 
     def __init__(self):
@@ -32,7 +32,8 @@ class Transform_PWCNET(Transform_base):
 
             outputArray = outputTensor.numpy().transpose(1, 2, 0).astype(np.float32)
             
-            vis = flow_vis.flow_to_color(outputArray)
+            # vis = flow_vis.flow_to_color(outputArray)
+            vis = self.flowToImage(outputArray)
 
             yield vis, firstImgName
 
