@@ -5,10 +5,10 @@ from .thirdparty.RAFT.core.utils.utils import InputPadder
 import torch
 import numpy as np
 from .thirdparty.RAFT.core.utils import flow_viz
-from utils.transformers.Transform_base import Transform_base
+from utils.transformers.optical_flow.Transform_opticalFlowBase import Transform_opticalFlowBase
 from .thirdparty.RAFT.core.raft import RAFT
 
-class Transform_RAFT(Transform_base):
+class Transform_RAFT(Transform_opticalFlowBase):
     command = 'raft'
 
     def __init__(self):
@@ -25,7 +25,6 @@ class Transform_RAFT(Transform_base):
         flo_img = flow_viz.flow_to_image(flo)
         # flo_img = flo_img[:, :, [2, 1, 0]]
         return flo_img
-
 
     def getArgParser(self):
         parser = argparse.ArgumentParser()
@@ -61,6 +60,9 @@ class Transform_RAFT(Transform_base):
 
                 flow_low, flow_up = raftmodel(img1, img2, iters=20, test_mode=True)
                 
-                flo_img = self.viz(flow_up)
+                # flo_img = self.viz(flow_up)
+
+                flo = flow_up[0].permute(1,2,0).cpu().numpy()
+                flo_img = self.flowToImage(flo)
 
                 yield flo_img, img1_name
