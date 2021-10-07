@@ -46,7 +46,7 @@ class RemoteServer:
             self.connected = False
             return True
 
-    def runTemplateScript(self, replace, expectRe, timeout=60):
+    def runTemplateScript(self, replace, expectRe, timeout=180):
         if self.script is None or self.connected == False or self.server is None:
             print('failed the initial check before running the script.')
             return None

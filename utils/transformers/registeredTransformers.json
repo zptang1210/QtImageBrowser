@@ -4,5 +4,6 @@
     "ourTracker": ["utils.transformers.tracker.Transform_ourTracker", "Transform_ourTracker"],
     "pwcnet": ["utils.transformers.optical_flow.Transform_PWCNET", "Transform_PWCNET"],
     "raft": ["utils.transformers.optical_flow.Transform_RAFT", "Transform_RAFT"],
-    "mode": ["utils.transformers.Transform_modeSubtract", "Transform_modeSubtract"]
+    "mode": ["utils.transformers.Transform_modeSubtract", "Transform_modeSubtract"],
+    "average": ["utils.transformers.Transform_average", "Transform_average"]
 }
