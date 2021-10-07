@@ -11,13 +11,7 @@ class Transform_trackerBase(Transform_base):
     def __init__(self):
         super().__init__()
 
-    # def getArgParser(self):
-    #     parser = argparse.ArgumentParser(description='Argument parser for cvtColor')
-    #     parser.add_argument('target', type=str, help='The target color (grey/color).')
-    #     return parser
-
     def processImageCollection(self, model, args):
-        print("processImageCollection")
         self.init(args)
 
         past_bbox = args.bbox
@@ -29,20 +23,6 @@ class Transform_trackerBase(Transform_base):
             else:
                 bbox = past_bbox
             yield self.visualize(img_np, bbox), img_name
-
-        # targetColor = args.target
-        # if targetColor not in ('grey', 'color'):
-        #     raise ValueError('target arg is invalid.')
-        # else:
-        #     mode_pil = 'RGB' if targetColor == 'color' else 'L'
-        #
-        # imgNum = model.length()
-        # for i in range(imgNum):
-        #     img_np, img_name = model.get(i) # TODO: get a copy
-        #     img_pil = Image.fromarray(img_np)
-        #     img_pil = img_pil.convert(mode_pil)
-        #
-        #     yield np.asarray(img_pil), img_name
 
     def visualize(self, frame, bbox):
         frame = np.uint8(frame)
