@@ -14,6 +14,20 @@ class Transform_opticalFlowFramework(Transform_opticalFlowBase):
         return parser
 
     def processImageCollection(self, model, args):
+        if args.vis == 'normal':
+            for flow, flow_name in self.computeOpticalFlowForImageCollection(model, args):
+                flow_img = self.visualize(flow)
+                yield flow_img, flow_name
+        elif args.vis == 'average':
+            flows = []
+            for flow, flow_name in self.computeOpticalFlowForImageCollection(model, args):
+                flows.append(flow)
+            floMean = self.averageFlows(flows)
+            yield self.visualize(floMean), 'mean_optical_flow'
+        else:
+            raise ValueError('invalid vis argument.')
+    
+    def computeOpticalFlowForImageCollection(self, model, args):
         self.initOpticalFlowAlgorithm(model, args)
 
         imgNum = model.length()
@@ -24,9 +38,7 @@ class Transform_opticalFlowFramework(Transform_opticalFlowBase):
             print(f'- processing {i}/{imgNum-1} - {img1_name} -> {img2_name}')
 
             flow, flow_name = self.computeOpticalFlow(img1, img1_name, img2, img2_name)
-
-            flow_img = self.visualize(flow, args.vis)
-            yield flow_img, flow_name
+            yield flow, flow_name       
 
     @abstractmethod
     def initOpticalFlowAlgorithm(self, model, args):
@@ -36,11 +48,6 @@ class Transform_opticalFlowFramework(Transform_opticalFlowBase):
     def computeOpticalFlow(self, img1, img1_name, img2, img2_name):
         return None, None
 
-    def visualize(self, flow, arg_vis):
-        if arg_vis == 'normal':
-            img = self.flowToImage(flow)
-            return img
-        elif arg_vis == 'average':
-            raise NotImplemented()
-        else:
-            raise ValueError('invalid vis argument.')
+    def visualize(self, flow):
+        img = self.flowToImage(flow)
+        return img
