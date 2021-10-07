@@ -65,7 +65,7 @@ class Transform_RAFT(Transform_opticalFlowBase):
                 # flo_img = self.viz(flow_up)
 
                 # use the tool we provide for visualization
-                flo = flow_up[0].permute(1,2,0).cpu().numpy()
+                flo = flow_up[0].permute(1,2,0).cpu().detach().numpy()
                 flo_img = self.flowToImage(flo)
 
                 yield flo_img, img1_name

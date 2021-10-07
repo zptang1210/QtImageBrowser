@@ -21,7 +21,7 @@ class Transform_RAFT(Transform_base):
         return img_tensor[None].to(self.DEVICE)
 
     def viz(self, flo):
-        flo = flo[0].permute(1,2,0).cpu().numpy()
+        flo = flo[0].permute(1,2,0).cpu().detach().numpy()
         flo_img = flow_viz.flow_to_image(flo)
         # flo_img = flo_img[:, :, [2, 1, 0]]
         return flo_img

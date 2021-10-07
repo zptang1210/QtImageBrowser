@@ -15,7 +15,7 @@ class Transform_PWCNET(Transform_opticalFlowFramework):
     def initOpticalFlowAlgorithm(self, model, args):
         pass
 
-    def computeOpticalFlow(self, img1, img2):
+    def computeOpticalFlow(self, img1, img1_name, img2, img2_name):
         img1 = img1[:, :, ::-1].transpose(2, 0, 1).astype(np.float32) * (1.0 / 255.0)
         img2 = img2[:, :, ::-1].transpose(2, 0, 1).astype(np.float32) * (1.0 / 255.0)
 
@@ -26,5 +26,5 @@ class Transform_PWCNET(Transform_opticalFlowFramework):
 
         outputArray = outputTensor.numpy().transpose(1, 2, 0).astype(np.float32)
 
-        return outputArray
+        return outputArray, img1_name
         

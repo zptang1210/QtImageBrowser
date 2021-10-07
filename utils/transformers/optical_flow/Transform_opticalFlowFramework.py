@@ -10,7 +10,7 @@ class Transform_opticalFlowFramework(Transform_opticalFlowBase):
 
     def getArgParser(self):
         parser = argparse.ArgumentParser(description='Base argument parser for optical flow')
-        parser.add_argument('--vis', type='str', default='normal', help='the visualization method (normal/average).')
+        parser.add_argument('--vis', type=str, default='normal', help='the visualization method (normal/average).')
         return parser
 
     def processImageCollection(self, model, args):
@@ -23,10 +23,9 @@ class Transform_opticalFlowFramework(Transform_opticalFlowBase):
             img2, img2_name = model.get(i+1)
             print(f'- processing {i}/{imgNum-1} - {img1_name} -> {img2_name}')
 
-            flow, flow_name = self.computeOpticalFlow(img1, img2)
+            flow, flow_name = self.computeOpticalFlow(img1, img1_name, img2, img2_name)
 
             flow_img = self.visualize(flow, args.vis)
-
             yield flow_img, flow_name
 
     @abstractmethod
@@ -34,12 +33,13 @@ class Transform_opticalFlowFramework(Transform_opticalFlowBase):
         pass
 
     @abstractmethod
-    def computeOpticalFlow(self, img1, img2):
+    def computeOpticalFlow(self, img1, img1_name, img2, img2_name):
         return None, None
 
     def visualize(self, flow, arg_vis):
         if arg_vis == 'normal':
             img = self.flowToImage(flow)
+            return img
         elif arg_vis == 'average':
             raise NotImplemented()
         else:

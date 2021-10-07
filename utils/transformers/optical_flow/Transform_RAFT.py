@@ -35,7 +35,7 @@ class Transform_RAFT(Transform_opticalFlowFramework):
         self.raftmodel.to(self.DEVICE)
         self.raftmodel.eval()
 
-    def computeOpticalFlow(self, img1, img2):
+    def computeOpticalFlow(self, img1, img1_name, img2, img2_name):
         img1 = self.load_image(img1)
         img2 = self.load_image(img2)
 
@@ -44,6 +44,6 @@ class Transform_RAFT(Transform_opticalFlowFramework):
 
         flow_low, flow_up = self.raftmodel(img1, img2, iters=20, test_mode=True)
 
-        flo = flow_up[0].permute(1,2,0).cpu().numpy()
+        flo = flow_up[0].permute(1,2,0).cpu().detach().numpy()
 
-        return flo
+        return flo, img1_name

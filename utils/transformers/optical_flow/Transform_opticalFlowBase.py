@@ -8,3 +8,4 @@ class Transform_opticalFlowBase(Transform_base):
 
     def flowToImage(self, flo):
         return flow_vis.flow_to_color(flo)
+        
