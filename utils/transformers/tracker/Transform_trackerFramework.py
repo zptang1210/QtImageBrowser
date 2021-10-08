@@ -9,7 +9,7 @@ class Transform_trackerFramework(Transform_trackerBase):
         super().__init__()
 
     def getArgParser(self):
-        parser = argparse.ArgumentParser(description='Base argument parser for optical flow')
+        parser = argparse.ArgumentParser(description='Base argument parser for tracker')
         parser.add_argument('--vis', type=str, default='img', help='the visualization method (img/bboxonly/bboxfixed).')
         return parser
 
