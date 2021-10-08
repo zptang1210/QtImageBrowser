@@ -15,4 +15,9 @@ class Transform_trackerBase(Transform_base):
                               (bbox[0] + bbox[2], bbox[1] + bbox[3]),
                               (255, 0, 0), 2)
 
-        return frame        
+        return frame
+
+    def visualizeBboxInFixedPosition(self, frame, bbox, init_frame, init_bbox):
+        ha, status = cv2.estimateAffine2D(bbox, init_bbox)
+        frame = cv2.warpAffine(frame, ha, (init_frame.shape[1], init_frame.shape[0]), borderMode=cv2.BORDER_REPLICATE)
+        return frame

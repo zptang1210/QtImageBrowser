@@ -11,6 +11,7 @@ class Transform_trackerFramework(Transform_trackerBase):
     def getArgParser(self):
         parser = argparse.ArgumentParser(description='Base argument parser for tracker')
         parser.add_argument('--vis', type=str, default='img', help='the visualization method (img/bboxonly/bboxfixed).')
+        parser.add_argument('--bbox', nargs='+', type=int, help='the coordinates of the initial bounding box.')
         return parser
 
     def processImageCollection(self, model, args):
@@ -24,19 +25,16 @@ class Transform_trackerFramework(Transform_trackerBase):
                 past_bbox = bbox
             else:
                 bbox = past_bbox
-            yield self.visualize(img_np, bbox, args.vis), img_name
+            # yield self.visualize(img_np, bbox, args.bbox, args.vis), img_name
 
-    def visualize(self, frame, bbox, arg_vis):
-        if arg_vis == 'img':
-            frame = self.visualizeImgWithBbox(frame, bbox)
-            return frame
-        elif arg_vis == 'bboxonly':
-            raise NotImplemented()
-        elif arg_vis == 'bboxfixed':
-            raise NotImplemented()
-        else:
-            raise ValueError('invalid vis argument.')
-
+            if args.vis == 'img':
+                yield self.visualizeImgWithBbox(img_np, bbox), img_name
+            elif args.vis == 'bboxonly':
+                raise NotImplemented()
+            elif args.vis == 'bboxfixed':
+                yield self.visualizeImgWithBbox(img_np, bbox, model.getImg(0), args.bbox)
+            else:
+                raise ValueError('invalid vis argument.')
 
     @abstractmethod
     def initTracker(self, args):

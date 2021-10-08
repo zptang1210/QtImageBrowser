@@ -528,7 +528,6 @@ class Transform_ourTracker(Transform_trackerFramework):
 
     def getArgParser(self):
         parser = super().getArgParser()
-        parser.add_argument('--bbox', nargs='+', type=int)
         return parser
 
 

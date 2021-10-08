@@ -129,7 +129,7 @@ class Transform_stabilizedTrack(Transform_base):
         
         
                 # Calculate Frames per second (FPS)
-                fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer);
+                fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer)
 
                 # Draw bounding box
                 if ok:
