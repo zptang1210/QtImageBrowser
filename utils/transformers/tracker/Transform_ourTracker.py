@@ -1,16 +1,12 @@
 import time
 import math
 import argparse
-import numpy as np
 import cv2
 import torch
 from torchvision import transforms
 import torch.nn.functional as F
 from collections import defaultdict, OrderedDict
-from utils.transformers.Transform_base import Transform_base
-from multiprocessing import Process, Queue
-
-from .Transform_trackerBase import Transform_trackerBase
+from utils.transformers.tracker.Transform_trackerFramework import Transform_trackerFramework
 from .models.models import Resnet18, Resnet34, Resnet50, DilResnet18, DilResnet50
 
 
@@ -521,7 +517,7 @@ class OurTracker:
 
 
 
-class Transform_ourTracker(Transform_trackerBase):
+class Transform_ourTracker(Transform_trackerFramework):
     command = 'ourtracker'
 
     def __init__(self):
@@ -536,7 +532,7 @@ class Transform_ourTracker(Transform_trackerBase):
         return parser
 
 
-    def init(self, args):
+    def initTracker(self, args):
         print("ourTracker init")
         #### PARAMS ####
         self.backbone = "resnet50"
