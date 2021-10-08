@@ -32,7 +32,7 @@ class Transform_trackerFramework(Transform_trackerBase):
             elif args.vis == 'bboxonly':
                 raise NotImplemented()
             elif args.vis == 'bboxfixed':
-                yield self.visualizeImgWithBbox(img_np, bbox, model.getImg(0), args.bbox)
+                yield self.visualizeBboxInFixedPosition(img_np, bbox, model.getImg(0), args.bbox), img_name
             else:
                 raise ValueError('invalid vis argument.')
 
