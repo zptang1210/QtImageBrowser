@@ -16,7 +16,7 @@ class Interact_selectROI(Interact_base):
         image, _ = model.get(0)
         image_ = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-        # CAUTIOUS: Now the image browser supports multithreading. This makes the following line fail because opencv only allow window related functions to run on the main thread.
+        # CAUTIOUS: interactive commands run on subthread, but you cannot do GUI related operation on subthread.
         # Thus you need to use a new process to run window related functions!
         queue = Queue()
         p = Process(target=Interact_selectROI.selectROI, args=(queue, image_, False))

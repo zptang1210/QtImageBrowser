@@ -128,16 +128,20 @@ class TransformCodeInterpreter:
             print('invalid rootSavePath.')
             return None
 
-        for i, (command, modulePath, className, argsList) in enumerate(code):
-            module = importlib.import_module(modulePath)
-            classMeta = getattr(module, className)
-            transformer = classMeta()
+        try:
+            for i, (command, modulePath, className, argsList) in enumerate(code):
+                module = importlib.import_module(modulePath)
+                classMeta = getattr(module, className)
+                transformer = classMeta()
 
-            saveName = newCollectionName if i == len(code) - 1 else None
-            model = transformer.run(model, argsList, rootSavePath=rootSavePath, saveName=saveName)
-            if model is None:
-                return None
-        
+                saveName = newCollectionName if i == len(code) - 1 else None
+                model = transformer.run(model, argsList, rootSavePath=rootSavePath, saveName=saveName)
+                if model is None:
+                    return None
+        except:
+            print('running script failed.', traceback.format_exc())
+            return None
+
         return model
 
 

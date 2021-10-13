@@ -12,11 +12,13 @@ class PresetManager:
         self.presetActionTriggered = presetActionTriggered
 
     def generatePresetMenu(self, parentMenu, presets):
+        parentMenu.setToolTipsVisible(True)
         for keyName in presets.keys():
             item = presets[keyName]
             if 'preset' in item.keys():
                 action = QtWidgets.QAction(item['name'], parentMenu)
                 action.triggered.connect((lambda checked, fileName=item['file']: self.presetActionTriggered(fileName)))
+                action.setToolTip(item['description'])
                 parentMenu.addAction(action)
             else:
                 subMenu = parentMenu.addMenu(keyName)
