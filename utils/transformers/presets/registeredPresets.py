@@ -6,6 +6,7 @@ fabienTrackerItem = {"preset": True, "name": "Fabien's tracker", "description": 
 fabienTrackerBboxFixedItem = {"preset": True, "name": "Fabien's tracker (bbox fixed)", "description": "track an object with Fabien's trcker with bbox fixed at the initial position", "file": "utils/transformers/presets/preset_ourTrackerBboxFixed.txt"}
 raftItem = {"preset": True, "name": "RAFT", "description": "compute optical flow via RAFT", "file": "utils/transformers/presets/preset_raft.txt"}
 pwcnetItem = {"preset": True, "name": "PWC-NET", "description": "compute optical flow via PWC-NET", "file": "utils/transformers/presets/preset_pwcnet.txt"}
+stabilizedOpticalFlowItem = {"preset": True, "name": "stabilized optical flow", "description": "track an object and stabilize the optical flow along the object", "file": "utils/transformers/presets/preset_stabilizedOpticalFlow.txt"}
 
 presets = \
 {
@@ -26,6 +27,7 @@ presets = \
     "optical flow": \
     {
         raftItem['name']: raftItem,
-        pwcnetItem['name']: pwcnetItem
+        pwcnetItem['name']: pwcnetItem,
+        stabilizedOpticalFlowItem['name']: stabilizedOpticalFlowItem
     }
 }

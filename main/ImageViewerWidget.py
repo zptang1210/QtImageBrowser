@@ -254,7 +254,6 @@ class ImageViewerWidget(QtWidgets.QWidget):
     def presetActionTriggered(self, fileName):
         print('selected preset:', fileName)
         script = self.presetManager.getPreset(fileName)
-        print(script)
 
         self.transformDlg = TransformDialog(self)
         self.transformDlg.setCode(script)
