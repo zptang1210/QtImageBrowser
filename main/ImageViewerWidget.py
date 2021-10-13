@@ -5,8 +5,7 @@ from PyQt5.QtGui import QIcon, QImage, QPixmap, qRgb
 from utils.TransformCodeParseAndRunThread import TransformCodeParseAndRunThread
 from models.ImageCollectionSubModel import ImageCollectionSubModel
 from main.TransformDialog import TransformDialog
-from PIL import Image
-import numpy as np
+from utils.PresetManager import PresetManager
 
 class ImageViewerWidget(QtWidgets.QWidget):
     maxLabelNum = 3
@@ -35,6 +34,16 @@ class ImageViewerWidget(QtWidgets.QWidget):
         self.transformAction.setShortcut('Ctrl+T')
         self.toolbar.addAction(self.transformAction)
         self.transformAction.triggered.connect(self.transformActionTriggered)
+
+        # Presets
+        self.presetManager = PresetManager(self.presetActionTriggered)
+        self.presetToolButton = QtWidgets.QToolButton()
+        self.presetToolButton.setText('Presets')
+        self.presetToolButton.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        self.presetMenu = QtWidgets.QMenu()
+        self.presetManager.generatePresetMenu(self.presetMenu, self.presetManager.presetList)
+        self.presetToolButton.setMenu(self.presetMenu)
+        self.toolbar.addWidget(self.presetToolButton)
 
         # Label
         self.labelToolButton = QtWidgets.QToolButton()
@@ -241,3 +250,21 @@ class ImageViewerWidget(QtWidgets.QWidget):
         assert 10 <= self.scale <= 200
 
         self.sliderValueChanged(self.slider.value())
+
+    def presetActionTriggered(self, fileName):
+        print('selected preset:', fileName)
+        script = self.presetManager.getPreset(fileName)
+        print(script)
+
+        self.transformDlg = TransformDialog(self)
+        self.transformDlg.setCode(script)
+
+        if self.transformDlg.exec_():
+            newCollectionName = self.transformDlg.getName()
+            code = self.transformDlg.getCode()
+            processingSrv = self.transformDlg.getSelectedProcessingServer()
+
+            TransformCodeParseAndRunThread.parseAndRun(code, self.model, newCollectionName, processingSrv, self.threadpool, self.transformFinishedCallback)
+        else:
+            self.transformDlg = None
+            return

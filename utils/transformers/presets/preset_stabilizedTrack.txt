@@ -1,0 +1,2 @@
+#define BBOX selectROI
+stabilizedTrack --bbox [BBOX]
