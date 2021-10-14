@@ -1,4 +1,4 @@
-srun --pty --gres=gpu:1 -t 0-01:00 /bin/bash
+srun --pty --gres=gpu:1 -t 0-00:20 /bin/bash
 conda activate qt
 [GENSCRIPT]
 [RUN]

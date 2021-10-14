@@ -1,3 +1,4 @@
+import time, random
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from utils.RemoteServerManager import remoteServerManager
@@ -39,7 +40,11 @@ class TransformDialog(QtWidgets.QDialog):
     def buttonOkClicked(self):
         name = self.getName().strip()
         code = self.getCode().strip()
-        if len(name) != 0 and ''.join(name.split()) == name and len(code) != 0: # no blank character or script
+
+        if len(name) == 0: # use a random string as the name
+            name = time.ctime().replace(' ', '_') + '-' + str(random.randint(0, 10000))
+
+        if ''.join(name.split()) == name and len(code) != 0: # no blank character or script
             self.setName(name)
             self.setCode(code) # normalize name and code
             self.accept()
@@ -64,6 +69,16 @@ class TransformDialog(QtWidgets.QDialog):
             return None
         else:
             return selected
+
+    def resetNameAndCode(self):
+        self.resetName()
+        self.resetCode()
+
+    def resetName(self):
+        self.setName(None)
+
+    def resetCode(self):
+        self.setCode(None)
 
 
 if __name__ == '__main__':

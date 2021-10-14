@@ -22,6 +22,7 @@ class RemoteServer:
         print('pxssh is trying to log into the server.')
         try:
             self.server = pxssh.pxssh()
+            self.server.force_password = True # TODO: support password login only for now
             passwd = passwdManager.getPasswd((self.config['server'], self.config['username']))
             self.server.login(server=self.config['server'], username=self.config['username'], password=passwd, sync_multiplier=5)
         except pxssh.ExceptionPexpect as e:
@@ -53,6 +54,7 @@ class RemoteServer:
 
         result = None
         for line in self.script:
+            self.server.set_unique_prompt()
             try:
                 line = line.strip()
                 if line == '[RUN]':

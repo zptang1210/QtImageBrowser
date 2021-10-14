@@ -22,7 +22,7 @@ class ImageViewerWidget(QtWidgets.QWidget):
 
         self.openedLabelSubWindows = []
         
-        self.transformDlg = None
+        self.transformDlg = TransformDialog(self)
         self.threadpool = QtCore.QThreadPool()
 
         self.toolbar = QtWidgets.QToolBar()
@@ -166,27 +166,26 @@ class ImageViewerWidget(QtWidgets.QWidget):
                 self.labelToggleActions[i].setChecked(False)
 
     def transformActionTriggered(self):
-        if self.transformDlg is None:
-            self.transformDlg = TransformDialog(self)
-
+        self.transformDlg.resetName()
         if self.transformDlg.exec_():
             newCollectionName = self.transformDlg.getName()
             code = self.transformDlg.getCode()
             processingSrv = self.transformDlg.getSelectedProcessingServer()
+            self.transformDlg.resetName()
 
             TransformCodeParseAndRunThread.parseAndRun(code, self.model, newCollectionName, processingSrv, self.threadpool, self.transformFinishedCallback)
         else:
-            self.transformDlg = None
-            return
+            self.transformDlg.resetNameAndCode()
 
     def transformFinishedCallback(self, newModel):
         if newModel is not None:
             flag = self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + '_temp', type='folder', parentModel=self.model)
             if flag:
                 QtWidgets.QMessageBox.information(self, 'Info', f'The new image collection {newModel.name} has been opened.', QtWidgets.QMessageBox.Ok)
-            self.transformDlg = None     
+            self.transformDlg.resetNameAndCode()
         else:
             QtWidgets.QMessageBox.warning(self, 'Warning', 'Failed to run the commands!', QtWidgets.QMessageBox.Ok)
+            self.transformDlg.resetName()
             self.transformAction.trigger()
 
     def getCurrentImgIdx(self):
@@ -255,15 +254,15 @@ class ImageViewerWidget(QtWidgets.QWidget):
         print('selected preset:', fileName)
         script = self.presetManager.getPreset(fileName)
 
-        self.transformDlg = TransformDialog(self)
+        self.transformDlg.resetNameAndCode()
         self.transformDlg.setCode(script)
 
         if self.transformDlg.exec_():
             newCollectionName = self.transformDlg.getName()
             code = self.transformDlg.getCode()
             processingSrv = self.transformDlg.getSelectedProcessingServer()
+            self.transformDlg.resetName()
 
             TransformCodeParseAndRunThread.parseAndRun(code, self.model, newCollectionName, processingSrv, self.threadpool, self.transformFinishedCallback)
         else:
-            self.transformDlg = None
-            return
+            self.transformDlg.resetNameAndCode()
