@@ -27,23 +27,95 @@ class ImageViewerWidget(QtWidgets.QWidget):
 
         self.toolbar = QtWidgets.QToolBar()
         # self.toolbar.setToolButtonStyle(Qt.ToolButtonIconOnly)
+        self.constructToolBar()
+
+        # main layout
+        self.mainLayout = QtWidgets.QVBoxLayout()
+        self.mainLayout.setMenuBar(self.toolbar)
+        self.setLayout(self.mainLayout)
+
+        # Image viewer
+        self.hLayout = QtWidgets.QHBoxLayout()
+        self.mainLayout.addLayout(self.hLayout)
+
+        # # Image Label
+        # self.image = QImage('a.jpg')
+
+        # image = Image.open('b.jpg')
+        # image = np.asarray(image)
+        # h, w, c = image.shape
+        # self.imageQImage = QImage(image.data, w, h, 3*w, QImage.Format_RGB888)
+        # self.imagePixMap = QPixmap(self.imageQImage)
+
+        image_qimg = QImage(500, 500, QImage.Format_RGB888)
+        image_qimg.fill(qRgb(255, 255, 255))
+        image_pixmap = QPixmap(image_qimg)
+        self.imageLabel = QtWidgets.QLabel()
+        # self.imageLabel.setScaledContents(True)
+        self.imageLabel.setAlignment(Qt.AlignCenter)
+        self.imageLabel.setPixmap(image_pixmap)
+        
+        self.hLayout.addWidget(self.imageLabel)
+
+        # Slider
+        self.slider = QtWidgets.QSlider(Qt.Vertical, self)
+        self.slider.setMinimum(0)
+        self.slider.setMaximum(self.model.length()-1)
+        self.slider.setInvertedAppearance(True)
+        self.slider.valueChanged.connect(self.sliderValueChanged)
+        self.hLayout.addWidget(self.slider)
+
+        self.extraInfoLabel = QtWidgets.QLabel()
+        self.mainLayout.addWidget(self.extraInfoLabel)
+
+        self.slider.setValue(0)
+        self.sliderValueChanged(0)
+
+
+    def constructToolBar(self):
+        # construct tool bar
+        # Navigate menu
+        self.navigateButton = QtWidgets.QToolButton()
+        self.navigateButton.setText('Navigate')
+        self.navigateButton.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+
+        self.navigateMenu = QtWidgets.QMenu()
+
+        self.goBackAction = QtWidgets.QAction('Go to previous image', self)
+        self.goBackAction.setShortcut('Up')
+        self.goBackAction.triggered.connect((lambda checked, signal='previous': self.goToActionTriggered(signal)))
+
+        self.goForthAction = QtWidgets.QAction('Go to next image', self)
+        self.goForthAction.setShortcut('Down')
+        self.goForthAction.triggered.connect((lambda checked, signal='next': self.goToActionTriggered(signal)))
+
+        self.goToAction = QtWidgets.QAction('Go to...', self)
+        self.goToAction.triggered.connect((lambda checked, signal='goto': self.goToActionTriggered(signal)))
+
+        self.navigateMenu.addAction(self.goBackAction)
+        self.navigateMenu.addAction(self.goForthAction)
+        self.navigateMenu.addAction(self.goToAction)
+
+        self.navigateButton.setMenu(self.navigateMenu)
+        self.toolbar.addWidget(self.navigateButton)
 
         # Transform
-        self.transformAction = QtWidgets.QAction('Transform', self)
+        self.transformAction = QtWidgets.QAction('Transform script', self)
         # self.transformAction = QtWidgets.QAction(QIcon('resources/icons/transformIcon.ico'), 'Transform', self)
         self.transformAction.setShortcut('Ctrl+T')
-        self.toolbar.addAction(self.transformAction)
         self.transformAction.triggered.connect(self.transformActionTriggered)
 
         # Presets
         self.presetManager = PresetManager(self.presetActionTriggered)
-        self.presetToolButton = QtWidgets.QToolButton()
-        self.presetToolButton.setText('Presets')
-        self.presetToolButton.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        self.transformToolButton = QtWidgets.QToolButton()
+        self.transformToolButton.setText('Transform')
+        self.transformToolButton.setPopupMode(QtWidgets.QToolButton.InstantPopup)
         self.presetMenu = QtWidgets.QMenu()
         self.presetManager.generatePresetMenu(self.presetMenu, self.presetManager.presetList)
-        self.presetToolButton.setMenu(self.presetMenu)
-        self.toolbar.addWidget(self.presetToolButton)
+        self.presetMenu.addSeparator()
+        self.presetMenu.addAction(self.transformAction)
+        self.transformToolButton.setMenu(self.presetMenu)
+        self.toolbar.addWidget(self.transformToolButton)
 
         # Label
         self.labelToolButton = QtWidgets.QToolButton()
@@ -100,49 +172,30 @@ class ImageViewerWidget(QtWidgets.QWidget):
         self.getPathAction.setShortcut('Ctrl+C')
         self.toolbar.addAction(self.getPathAction)
         self.getPathAction.triggered.connect(self.getPathActionTriggered)
-        
-        self.mainLayout = QtWidgets.QVBoxLayout()
-        self.mainLayout.setMenuBar(self.toolbar)
-        self.setLayout(self.mainLayout)
 
-        self.hLayout = QtWidgets.QHBoxLayout()
-        self.mainLayout.addLayout(self.hLayout)
+    def goToActionTriggered(self, key):
+        if key == 'previous':
+            value = self.slider.value() - 1
+        elif key == 'next':
+            value = self.slider.value() + 1
+        elif key == 'goto':
+            idx_str, ok = QtWidgets.QInputDialog.getText(None, "Go to a sepecific image", f"Index (0-{self.model.length()-1}):")
+            if not ok:
+                return
+            else:
+                try:
+                    value = int(idx_str)
+                except:
+                    print('invalid input of index.')
+                    return
 
-        # # Image Label
-        # self.image = QImage('a.jpg')
-
-        # image = Image.open('b.jpg')
-        # image = np.asarray(image)
-        # h, w, c = image.shape
-        # self.imageQImage = QImage(image.data, w, h, 3*w, QImage.Format_RGB888)
-        # self.imagePixMap = QPixmap(self.imageQImage)
-
-        image_qimg = QImage(500, 500, QImage.Format_RGB888)
-        image_qimg.fill(qRgb(255, 255, 255))
-        image_pixmap = QPixmap(image_qimg)
-        self.imageLabel = QtWidgets.QLabel()
-        # self.imageLabel.setScaledContents(True)
-        self.imageLabel.setAlignment(Qt.AlignCenter)
-        self.imageLabel.setPixmap(image_pixmap)
-        
-        self.hLayout.addWidget(self.imageLabel)
-
-        # Slider
-        self.slider = QtWidgets.QSlider(Qt.Vertical, self)
-        self.slider.setMinimum(0)
-        self.slider.setMaximum(self.model.length()-1)
-        self.slider.setInvertedAppearance(True)
-        self.slider.valueChanged.connect(self.sliderValueChanged)
-        self.hLayout.addWidget(self.slider)
-
-        self.extraInfoLabel = QtWidgets.QLabel()
-        self.mainLayout.addWidget(self.extraInfoLabel)
-
-        self.slider.setValue(0)
-        self.sliderValueChanged(0)
-
+        if value >= 0 and value < self.model.length():
+            self.slider.setValue(value)
 
     def sliderValueChanged(self, value):
+        if not (value >= 0 and value < self.model.length()):
+            return
+
         image_np, image_name = self.model.get(value)
 
         h, w, c = image_np.shape
@@ -251,7 +304,7 @@ class ImageViewerWidget(QtWidgets.QWidget):
         self.sliderValueChanged(self.slider.value())
 
     def presetActionTriggered(self, fileName):
-        print('selected preset:', fileName)
+        # print('selected preset:', fileName)
         script = self.presetManager.getPreset(fileName)
 
         self.transformDlg.resetNameAndCode()
