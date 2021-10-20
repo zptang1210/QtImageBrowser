@@ -37,7 +37,7 @@ class Transform_trackerBase(Transform_base):
 
     def visualizeBboxInCenterPosition(self, frame, bbox, frame_size, hide_bbox=False):
         _, _, bbox_w, bbox_h = bbox
-        frame_w, frame_h = frame_size
+        frame_h, frame_w = frame_size # frame_size: (H, W)
         center_bbox = (int(frame_w/2 - bbox_w/2), int(frame_h/2 - bbox_h/2), bbox_w, bbox_h)
-        frame_warped = self.visualizeBboxInFixedPositionq(frame, bbox, frame_size, center_bbox, hide_bbox)
+        frame_warped = self.visualizeBboxInFixedPosition(frame, bbox, frame_size, center_bbox, hide_bbox)
         return frame_warped
