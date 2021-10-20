@@ -235,11 +235,10 @@ class ImageViewerWidget(QtWidgets.QWidget):
             flag = self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + '_temp', type='folder', parentModel=self.model)
             if flag:
                 QtWidgets.QMessageBox.information(self, 'Info', f'The new image collection {newModel.name} has been opened.', QtWidgets.QMessageBox.Ok)
-            self.transformDlg.resetNameAndCode()
         else:
             QtWidgets.QMessageBox.warning(self, 'Warning', 'Failed to run the commands!', QtWidgets.QMessageBox.Ok)
-            self.transformDlg.resetName()
-            self.transformAction.trigger()
+            
+        self.transformDlg.resetNameAndCode()
 
     def getCurrentImgIdx(self):
         return self.slider.value()
