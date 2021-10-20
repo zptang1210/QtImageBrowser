@@ -1,0 +1,3 @@
+#define BBOX selectROI
+ourTracker --bbox [BBOX] --vis=bboxcentralized --hide_bbox True
+raft --vis average
