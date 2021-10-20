@@ -31,7 +31,8 @@ class Transform_trackerFramework(Transform_trackerBase):
             if args.vis == 'img':
                 yield self.visualizeImgWithBbox(img_np, bbox, hide_bbox=args.hide_bbox), img_name
             elif args.vis == 'bboxfixed':
-                yield self.visualizeBboxInFixedPosition(img_np, bbox, model.getImg(0), args.bbox, hide_bbox=args.hide_bbox), img_name
+                first_img_size = model.getImg(0).shape # H, W, C
+                yield self.visualizeBboxInFixedPosition(img_np, bbox, first_img_size[:2], args.bbox, hide_bbox=args.hide_bbox), img_name
             else:
                 raise ValueError('invalid vis argument.')
 

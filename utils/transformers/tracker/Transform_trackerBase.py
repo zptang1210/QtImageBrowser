@@ -18,14 +18,14 @@ class Transform_trackerBase(Transform_base):
 
         return frame
 
-    def visualizeBboxInFixedPosition(self, frame, bbox, init_frame, init_bbox, hide_bbox=False):
+    def visualizeBboxInFixedPosition(self, frame, bbox, frame_size, init_bbox, hide_bbox=False):
         x0, y0, w, h = bbox
         bbox_ = np.array([[x0, y0], [x0+w, y0], [x0+w, y0+h], [x0, y0+h]])
         x0, y0, w, h = init_bbox
         init_bbox_ = np.array([[x0, y0], [x0+w, y0], [x0+w, y0+h], [x0, y0+h]])
 
         ha, status = cv2.findHomography(bbox_, init_bbox_)
-        frame_warped = cv2.warpPerspective(frame, ha, (init_frame.shape[1], init_frame.shape[0]), borderMode=cv2.BORDER_REPLICATE)
+        frame_warped = cv2.warpPerspective(frame, ha, (frame_size[1], frame_size[0]), borderMode=cv2.BORDER_REPLICATE)
         
         if not hide_bbox:
             p1 = (int(init_bbox[0]), int(init_bbox[1]))
