@@ -28,6 +28,7 @@ class RemoteServer:
         except pxssh.ExceptionPexpect as e:
             print('pxssh failed.', e)
             passwdManager.invalidateStoredPasswd((self.config['server'], self.config['username']))
+            self.server = None
             self.connected = False
             return False
         else:
@@ -41,13 +42,16 @@ class RemoteServer:
                 self.server.logout()
         except:
             print('pxssh logout failed.')
-            return False
+            flag = False
         else:
             print('pxssh logout succeeded.')
-            self.connected = False
-            return True
+            flag = True
 
-    def runTemplateScript(self, replace, expectRe, timeout=180):
+        self.server = None
+        self.connected = False
+        return flag
+
+    def runTemplateScript(self, replace, expectRe, timeout=1):
         if self.script is None or self.connected == False or self.server is None:
             print('failed the initial check before running the script.')
             return None
@@ -89,7 +93,8 @@ class RemoteServer:
             return result
 
     def __del__(self):
-        self.logout()
+        if self.server is not None and self.connected:
+            self.logout()
 
     def get_server(self):
         if self.config is not None:

@@ -206,6 +206,7 @@ class TransformCodeInterpreter:
                 raise RuntimeError('model uploading failed.')
         except:
             print('model uploading failed.')
+            server.logout() # log out from the server
             return None
         else:
             print('model uploading succeeded.')
@@ -226,7 +227,8 @@ class TransformCodeInterpreter:
         expectRe = 'transform_finished (\d) (.*) (.*)'
         result = server.runTemplateScript(replace, expectRe)
         print('transform result:', result)
-        if result is None: # running failed
+        if result is None: # running failed    
+            server.logout() # log out from the server
             return None
 
         # parse result
@@ -238,6 +240,9 @@ class TransformCodeInterpreter:
         
         # organize the result as a model and return it.
         newServerPath = f'{server.get_username()}@{server.get_server()}:{newPath}'
+
+        # log out from the server
+        server.logout()
         
         if flag == 0:
             return None
