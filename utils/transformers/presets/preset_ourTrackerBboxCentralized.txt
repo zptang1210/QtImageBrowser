@@ -1,0 +1,2 @@
+#define bbox selectROI
+ourTracker --bbox [bbox] --vis=bboxcentralized

@@ -33,7 +33,7 @@ class Transform_trackerFramework(Transform_trackerBase):
             elif args.vis == 'bboxfixed':
                 first_img_size = model.getImg(0).shape # H, W, C
                 yield self.visualizeBboxInFixedPosition(img_np, bbox, first_img_size[:2], args.bbox, hide_bbox=args.hide_bbox), img_name
-            elif args.vis == 'bboxcenterized':
+            elif args.vis == 'bboxcentralized':
                 first_img_size = model.getImg(0).shape # H, W, C
                 yield self.visualizeBboxInCenterPosition(img_np, bbox, first_img_size[:2], hide_bbox=args.hide_bbox), img_name                
             else:
