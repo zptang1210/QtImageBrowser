@@ -1,5 +1,6 @@
+import os
+import time
 import cv2
-from multiprocessing import Process, Queue
 from utils.interactTools.Interact_base import Interact_base
 
 class Interact_selectROI(Interact_base):
@@ -8,26 +9,31 @@ class Interact_selectROI(Interact_base):
     def __init__(self):
         super().__init__()
 
-    def selectROI(queue, frame, flag):
-        bbox = cv2.selectROI(frame, flag)
-        queue.put(bbox)
-
     def interact(self, model):
         image, _ = model.get(0)
-        image_ = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        temp_root_path = os.path.abspath(os.path.join('.', 'tmp', 'interactToolTmp'))
+        if not os.path.exists(temp_root_path):
+            os.makedirs(temp_root_path)
 
-        # CAUTIOUS: interactive commands run on subthread, but you cannot do GUI related operation on subthread.
-        # Thus you need to use a new process to run window related functions!
-        queue = Queue()
-        p = Process(target=Interact_selectROI.selectROI, args=(queue, image_, False))
-        p.start()
-        p.join()
-        bbox = queue.get(True)
+        randn_str = str(time.time())
+        temp_image_name = 'selectROI_' + randn_str + '.jpg'
 
-        if bbox == (0, 0, 0, 0):
-            bbox_res = None
-        else:
-            bbox_res = f'{bbox[0]} {bbox[1]} {bbox[2]} {bbox[3]}'
+        temp_image_path = os.path.join(temp_root_path, temp_image_name)
+        image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        cv2.imwrite(temp_image_path, image_bgr)
 
-        print('bbox', bbox_res)
-        return bbox_res
+        temp_output_name = 'selectROI_' + randn_str + '.txt'
+        temp_output_path = os.path.join(temp_root_path, temp_output_name)
+
+        selectROI_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'selectROI.py')
+        # Notice Qt cannot work with opencv's GUI functions together, so we have to use a separate python interpreter for cv2.selectROI
+        os.system(' '.join(['python', selectROI_path, temp_image_path, temp_output_path]))
+
+        with open(temp_output_path, 'r') as fin:
+            bbox = fin.read().strip()
+        print('bbox', bbox)
+
+        os.remove(temp_output_path)
+        os.remove(temp_image_path)
+
+        return bbox
