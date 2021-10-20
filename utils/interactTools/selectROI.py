@@ -17,3 +17,5 @@ if __name__ == '__main__':
     
     with open(outputPath, 'w') as fout:
         fout.write(bbox_res)
+
+    cv2.destroyAllWindows()

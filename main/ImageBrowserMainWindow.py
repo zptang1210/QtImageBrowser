@@ -1,4 +1,3 @@
-
 import os
 from PyQt5 import QtCore, QtWidgets
 from main.ImageBrowserWindow import Ui_MainWindow
