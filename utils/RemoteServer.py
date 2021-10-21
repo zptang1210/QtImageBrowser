@@ -3,6 +3,9 @@ from utils.PasswdManager import passwdManager
 from pexpect import pxssh
 
 class RemoteServer:
+
+    TIMEOUT = 240
+
     def __init__(self, config):
         self.config = None
         self.script = None
@@ -51,7 +54,7 @@ class RemoteServer:
         self.connected = False
         return flag
 
-    def runTemplateScript(self, replace, expectRe, timeout=1):
+    def runTemplateScript(self, replace, expectRe, timeout=TIMEOUT):
         if self.script is None or self.connected == False or self.server is None:
             print('failed the initial check before running the script.')
             return None
@@ -78,6 +81,7 @@ class RemoteServer:
                 else:
                     i = self.server.expect([expectRe, '[Ee]rror', '[Ff]ailed', '[Ee]xception'], timeout=timeout)
                     if i != 0:
+                        print('debug info:', self.server.before, self.server.after)
                         raise RuntimeError('failed to run [RUN].')
                     else:
                         result = self.server.after.decode()
