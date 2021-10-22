@@ -9,7 +9,6 @@ class Transform_trackerBase(Transform_base):
     
     def visualizeImgWithBbox(self, frame, bbox, hide_bbox=False):
         frame = np.uint8(frame)
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         if not hide_bbox:
             frame = cv2.rectangle(frame,
                                 (bbox[0], bbox[1]),
