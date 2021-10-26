@@ -42,7 +42,7 @@ class TransformDialog(QtWidgets.QDialog):
         code = self.getCode().strip()
 
         if len(name) == 0: # use a random string as the name
-            name = time.ctime().replace(' ', '_') + '-' + str(random.randint(0, 10000))
+            name = time.ctime().replace(' ', '_').replace(':', '.') + '-' + str(random.randint(0, 10000))
 
         if ''.join(name.split()) == name and len(code) != 0: # no blank character or script
             self.setName(name)
