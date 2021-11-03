@@ -3,9 +3,9 @@ from glob import glob
 from utils.pathUtils import normalizePath
 from PIL import Image
 import numpy as np
-from models.ImageCollectionModel import ImageCollectionModel
+from models.ImageCollectionBasicModel import ImageCollectionBasicModel
 
-class ImageCollectionFolderModel(ImageCollectionModel):
+class ImageCollectionFolderModel(ImageCollectionBasicModel):
     def __init__(self, path, name, parentModel=None):
         super().__init__()
         assert path == normalizePath(path)
@@ -27,7 +27,7 @@ class ImageCollectionFolderModel(ImageCollectionModel):
         return len(self.imgList)
 
     def getImg(self, idx):
-        assert idx >= 0 and self.length()
+        assert idx >= 0 and idx < self.length()
         image_pil = Image.open(self.imgList[idx])
         image_pil = image_pil.convert('RGB')
         image_np = np.asarray(image_pil)

@@ -1,6 +1,6 @@
-from models.ImageCollectionModel import ImageCollectionModel
+from models.ImageCollectionDerivedModel import ImageCollectionDerivedModel
 
-class ImageCollectionSubModel(ImageCollectionModel):
+class ImageCollectionSubModel(ImageCollectionDerivedModel):
     def __init__(self, name, subItemIndexes, parentModel):
         super().__init__()
         self.parentModel = parentModel
@@ -9,8 +9,14 @@ class ImageCollectionSubModel(ImageCollectionModel):
 
         self.subItemIndexes = subItemIndexes
 
+        self.sourceModel = self.parentModel
+
     def length(self):
         return len(self.subItemIndexes)
+
+    def getData(self, idx):
+        assert idx >=0 and idx < self.length()
+        return self.parentModel.getData(self.subItemIndexes[idx])
     
     def getImg(self, idx):
         assert idx >= 0 and idx < self.length()

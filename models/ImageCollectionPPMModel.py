@@ -1,9 +1,9 @@
 import os
 from utils.pathUtils import normalizePath
-from models.ImageCollectionModel import ImageCollectionModel
+from models.ImageCollectionBasicModel import ImageCollectionBasicModel
 from utils import PPMProcessor
 
-class ImageCollectionPPMModel(ImageCollectionModel):
+class ImageCollectionPPMModel(ImageCollectionBasicModel):
     def __init__(self, path, name, parentModel=None):
         super().__init__()
         assert path == normalizePath(path)

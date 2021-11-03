@@ -5,10 +5,10 @@ from main.ImageViewerSubWindow import ImageViewerSubWindow
 from main.ImageCollectionSaveDialog import ImageCollectionSaveDialog
 from main.ImageCollectionOpenDialog import ImageCollectionOpenDialog
 from models.ImageCollectionCloudModel import ImageCollectionCloudModel
+from models.ImageCollectionDerivedModel import ImageCollectionDerivedModel
 from utils.SaveImageCollection import SaveImageCollection
 from utils.pathUtils import getPathType, normalizePath, PathType
-from configs.availTypesConfig import availTypes
-from configs.availTypesConfig import modelClassDict
+from configs.availTypesConfig import availTypes, modelClassDict, modelNameDict
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -132,7 +132,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
 
     def saveAndOpenCollection(self, modelToSave):
-        diag = ImageCollectionSaveDialog(self)
+        if isinstance(modelToSave, ImageCollectionDerivedModel):
+            modelToSaveTypeName = modelNameDict[type(modelToSave.sourceModel)]
+        else:
+            modelToSaveTypeName = modelNameDict[type(modelToSave)]
+        diag = ImageCollectionSaveDialog(modelToSaveTypeName=modelToSaveTypeName, parent=self)
         if diag.exec_():
             path = diag.getPath()
             name = diag.getName()

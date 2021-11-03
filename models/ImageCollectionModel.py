@@ -16,6 +16,10 @@ class ImageCollectionModel:
         pass
 
     @abstractmethod
+    def getData(self, idx):
+        pass
+
+    @abstractmethod
     def getImg(self, idx):
         pass
 

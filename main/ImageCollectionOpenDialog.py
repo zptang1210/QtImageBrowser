@@ -1,23 +1,25 @@
 import os
 from PyQt5 import QtWidgets
+from configs.availTypesConfig import FileType, TypeProperty
 from main.ImageCollectionSelectionDialog import ImageCollectionSelectionDialog
 from utils.RemoteServerManager import remoteServerManager
 from utils.pathUtils import getPathType, normalizePath, PathType
+from configs.availTypesConfig import availTypes
 
 class ImageCollectionOpenDialog(ImageCollectionSelectionDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        # add types to combobox, all types are ok.
+        self.typeComboBox.addItems(availTypes)
 
     # override
     def fileDialogButtonClicked(self):
-        selectedType = self.typeComboBox.currentText()
-        if selectedType == 'folder':
+        selectedType = self.getType()
+        if TypeProperty[selectedType]['fileType'] == FileType.folder:
             path = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Image Folder', '')
-        elif selectedType == 'video':
-            path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '', 'Videos (*.mp4 *.avi)')
-        elif selectedType == 'ppm':
-            path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '', 'PPM Image (*.ppm)')
+        elif TypeProperty[selectedType]['fileType'] == FileType.file:
+            path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '', TypeProperty[selectedType]['fileDlgHint'])
         else:
             path = None
             raise ValueError('invalid selected type.')
@@ -30,7 +32,7 @@ class ImageCollectionOpenDialog(ImageCollectionSelectionDialog):
 
     # override
     def buttonOKClicked(self):
-        selectedType = self.typeComboBox.currentText()
+        selectedType = self.getType()
         path = self.getPath().strip()
 
         if getPathType(path) == PathType.Invalid:
@@ -55,14 +57,11 @@ class ImageCollectionOpenDialog(ImageCollectionSelectionDialog):
         # if the path is of the server format, detect its extension only.
         invalid = False
         
-        if selectedType == 'folder':
+        if TypeProperty[selectedType]['fileType'] == FileType.folder:
             if not self.isValidPath(path):
                 invalid = True
-        elif selectedType == 'video':
-            if (not self.isValidPath(path)) or (os.path.splitext(path)[1].lower() not in ('.mp4', '.avi')):
-                invalid = True
-        elif selectedType == 'ppm':
-            if (not self.isValidPath(path)) or (os.path.splitext(path)[1].lower() != '.ppm'):
+        elif TypeProperty[selectedType]['fileType'] == FileType.file:
+            if (not self.isValidPath(path)) or (os.path.splitext(path)[1].lower() not in TypeProperty[selectedType]['extension']):
                 invalid = True
         else:
             invalid = True

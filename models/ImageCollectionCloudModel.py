@@ -1,11 +1,11 @@
 import os
 from utils.pathUtils import normalizePath, getPathType, PathType
-from models.ImageCollectionModel import ImageCollectionModel
+from models.ImageCollectionDerivedModel import ImageCollectionDerivedModel
 from utils.rsyncWrapper import rsync
 from configs.availTypesConfig import availTypes
 from configs.availTypesConfig import modelClassDict
 
-class ImageCollectionCloudModel(ImageCollectionModel):
+class ImageCollectionCloudModel(ImageCollectionDerivedModel):
     DEFAULT_LOCAL_ROOT_PATH = normalizePath(os.path.join('.', 'tmp'))
 
     def __init__(self, path, name, type, localPath=None, preload=True, parentModel=None):
@@ -40,6 +40,8 @@ class ImageCollectionCloudModel(ImageCollectionModel):
             self.loaded = False
             self.model = None
 
+        self.sourceModel = self.model
+
 
     def load(self, serverPath, localPath):
         if self.type == 'folder' and not serverPath.endswith('/'):
@@ -64,6 +66,10 @@ class ImageCollectionCloudModel(ImageCollectionModel):
     def length(self):
         assert self.loaded
         return self.model.length()
+
+    def getData(self, idx):
+        assert self.loaded
+        return self.model.getData(idx)
     
     def getImg(self, idx):
         assert self.loaded
