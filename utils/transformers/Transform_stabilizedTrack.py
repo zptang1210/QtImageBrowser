@@ -1,14 +1,13 @@
 import argparse
 import numpy as np
 import cv2
-from utils.transformers.Transform_base import Transform_base
-from multiprocessing import Process, Queue
+from utils.transformers.Transform_toBasicModel import Transform_toBasicModel
 
 def selectROI(queue, frame, flag):
     bbox = cv2.selectROI(frame, flag)
     queue.put(bbox)
 
-class Transform_stabilizedTrack(Transform_base):
+class Transform_stabilizedTrack(Transform_toBasicModel):
     command = 'stabilizedTrack'
 
     def __init__(self):

@@ -2,10 +2,12 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QIcon, QImage, QPixmap, qRgb
+from models.ImageCollectionDerivedModel import ImageCollectionDerivedModel
 from utils.TransformCodeParseAndRunThread import TransformCodeParseAndRunThread
 from models.ImageCollectionSubModel import ImageCollectionSubModel
 from main.TransformDialog import TransformDialog
 from utils.PresetManager import PresetManager
+from configs.availTypesConfig import modelNameDict
 
 class ImageViewerWidget(QtWidgets.QWidget):
     maxLabelNum = 3
@@ -232,7 +234,13 @@ class ImageViewerWidget(QtWidgets.QWidget):
 
     def transformFinishedCallback(self, newModel):
         if newModel is not None:
-            flag = self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + '_temp', type='folder', parentModel=self.model)
+            # get model type # TODO: can be extracted to a function
+            if isinstance(newModel, ImageCollectionDerivedModel):
+                newModelTypeName = modelNameDict[type(newModel.sourceModel)]
+            else:
+                newModelTypeName = modelNameDict[type(newModel)]
+
+            flag = self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + '_temp', type=newModelTypeName, parentModel=self.model)
             if flag:
                 QtWidgets.QMessageBox.information(self, 'Info', f'The new image collection {newModel.name} has been opened.', QtWidgets.QMessageBox.Ok)
         else:

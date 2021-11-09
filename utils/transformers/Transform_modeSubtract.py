@@ -1,11 +1,11 @@
 import numpy as np
-from utils.transformers.Transform_base import Transform_base
 from scipy import stats
 import cv2
+from utils.transformers.Transform_toBasicModel import Transform_toBasicModel
 
 
 
-class Transform_modeSubtract(Transform_base):
+class Transform_modeSubtract(Transform_toBasicModel):
     command = 'mode'
 
     def __init__(self):
