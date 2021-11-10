@@ -76,6 +76,8 @@ elif sys.platform.startswith('linux'):
             self.path = path
             self.name = name
             self.parentModel = parentModel
+            self.sourceModel = self
+            self.sourceModelTypeName = 'video'
 
             # open the video
             self.cap = cv2.VideoCapture(self.path)
