@@ -59,27 +59,27 @@ def runTransform(output=sys.stderr):
     flag = checkArgs(args, output=output)
     if not flag: 
         print('invalid args', file=output)
-        return False, None, None
+        return False, None, None, None
 
     model = createModel(args.model_path,  str(time.time()), args.model_type)
     if model is None:
         print('failed to load the model', file=output)
-        return False, None, None
+        return False, None, None, None
     
     try:
         with open(args.script_file, 'r') as fin:
             rawCode = fin.read()
     except:
         print('failed to read the script', file=output)
-        return False, None, None
+        return False, None, None, None
 
     rootSavePath = normalizePath(os.path.join(os.path.dirname(__file__), 'tmp'))
     model = runScript(rawCode, model, args.result_name, rootSavePath)
     if model is None:
         print('failed to run the script', file=output)
-        return False, None, None
+        return False, None, None, None
     
-    return True, model.path, model.name
+    return True, model.path, model.name, model.sourceModelTypeName
 
 
 
@@ -88,8 +88,8 @@ if __name__ == '__main__':
     logFileName = 'log_' + '_'.join(time.ctime().split()) + '.txt'
     with open(os.path.join('.', 'log', logFileName), 'w') as fout:
         fout.write(' '. join(sys.argv) + '\n')
-        flag, path, name = runTransform(output=fout)
-        print('transform_finished', int(flag), path, name, file=fout)
+        flag, path, name, typeName = runTransform(output=fout)
+        print('transform_finished', int(flag), path, name, typeName, file=fout)
 
-    print('transform_finished', int(flag), path, name, file=sys.stdout)
+    print('transform_finished', int(flag), path, name, typeName, file=sys.stdout)
     

@@ -186,11 +186,11 @@ class TransformCodeInterpreter:
         # TODO: upload the local model to the corresponding server, and use the path on the server to run the script
         # if the model is a cloud model, use localPath instead of the path.
         try:
-            modelType = None
-            if isinstance(model, ImageCollectionCloudModel):
-                modelType = model.sourceModelTypeName
-            else:
-                modelType = modelNameDict[type(model)]
+            modelType = model.sourceModelTypeName
+            # if isinstance(model, ImageCollectionCloudModel):
+            #     modelType = model.sourceModelTypeName
+            # else:
+            #     modelType = modelNameDict[type(model)]
 
             modelLocalPath = None
             if isinstance(model, ImageCollectionCloudModel):
@@ -224,7 +224,7 @@ class TransformCodeInterpreter:
         
         # run the generated script on the server
         replace = {'[GENSCRIPT]': genscriptCode, '[RUN]': runCode}
-        expectRe = 'transform_finished (\d) (.*) (.*)'
+        expectRe = 'transform_finished (\d) (.*) (.*) (.*)'
         result = server.runTemplateScript(replace, expectRe)
         print('transform result:', result)
         if result is None: # running failed    
@@ -237,6 +237,7 @@ class TransformCodeInterpreter:
         flag = int(m.group(1).strip())
         newPath = m.group(2).strip()
         newName = m.group(3).strip()
+        newTypeName = m.group(4).strip()
         
         # organize the result as a model and return it.
         newServerPath = f'{server.get_username()}@{server.get_server()}:{newPath}'
@@ -249,7 +250,7 @@ class TransformCodeInterpreter:
         else:
             try:
                 # don't preload it to save time since it will be load when opening it to the main window
-                newModel = ImageCollectionCloudModel(newServerPath, newName, 'folder', preload=False)
+                newModel = ImageCollectionCloudModel(newServerPath, newName, newTypeName, preload=False)
             except:
                 print('error occurs when creating a cloud model.')
                 return None
