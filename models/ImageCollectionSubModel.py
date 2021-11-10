@@ -1,4 +1,5 @@
 from models.ImageCollectionDerivedModel import ImageCollectionDerivedModel
+from configs.availTypesConfig import modelNameDict
 
 class ImageCollectionSubModel(ImageCollectionDerivedModel):
     def __init__(self, name, subItemIndexes, parentModel):
@@ -10,6 +11,7 @@ class ImageCollectionSubModel(ImageCollectionDerivedModel):
         self.subItemIndexes = subItemIndexes
 
         self.sourceModel = self.parentModel
+        self.sourceModelTypeName = modelNameDict[type(self.sourceModel)]
 
     def length(self):
         return len(self.subItemIndexes)

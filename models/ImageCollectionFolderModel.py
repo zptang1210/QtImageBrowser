@@ -12,6 +12,8 @@ class ImageCollectionFolderModel(ImageCollectionBasicModel):
         self.path = path
         self.name = name
         self.parentModel = parentModel
+        self.sourceModel = self
+        self.sourceModelTypeName = 'folder'
 
         self.imgList = glob(os.path.join(self.path, '*.png')) + \
             glob(os.path.join(self.path, '*.jpg')) + \

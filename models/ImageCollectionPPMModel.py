@@ -10,6 +10,8 @@ class ImageCollectionPPMModel(ImageCollectionBasicModel):
         self.path = path
         self.name = name
         self.parentModel = parentModel
+        self.sourceModel = self
+        self.sourceModelTypeName = 'ppm'
 
         try:
             self.imgList = PPMProcessor.readSuperPPM(self.path)

@@ -3,7 +3,7 @@ from utils.pathUtils import normalizePath, getPathType, PathType
 from models.ImageCollectionDerivedModel import ImageCollectionDerivedModel
 from utils.rsyncWrapper import rsync
 from configs.availTypesConfig import availTypes
-from configs.availTypesConfig import modelClassDict
+from configs.availTypesConfig import modelClassDict, modelNameDict
 
 class ImageCollectionCloudModel(ImageCollectionDerivedModel):
     DEFAULT_LOCAL_ROOT_PATH = normalizePath(os.path.join('.', 'tmp'))
@@ -41,6 +41,7 @@ class ImageCollectionCloudModel(ImageCollectionDerivedModel):
             self.model = None
 
         self.sourceModel = self.model
+        self.sourceModelTypeName = modelNameDict[type(self.sourceModel)]
 
 
     def load(self, serverPath, localPath):

@@ -12,6 +12,8 @@ class ImageCollectionOpticalFlowModel(ImageCollectionCompoundModel):
         self.path = path
         self.name = name
         self.parentModel = parentModel
+        self.sourceModel = self
+        self.sourceModelTypeName = 'opticalFlow'
 
         self.ofList = glob(os.path.join(self.path, '*.flo'))
         self.ofList = list(map(normalizePath, self.ofList))
@@ -46,12 +48,8 @@ class ImageCollectionOpticalFlowModel(ImageCollectionCompoundModel):
 
     @staticmethod
     def saveModel(modelToSave, savePath):
-        if isinstance(modelToSave, ImageCollectionDerivedModel):
-            modelToSaveType = type(modelToSave.sourceModel)
-        else:
-            modelToSaveType = type(modelToSave)
-
-        if modelToSaveType != ImageCollectionOpticalFlowModel:
+        modelToSaveTypeName = modelToSave.sourceModelTypeName
+        if modelToSaveTypeName != 'opticalFlow':
             return False
 
         if not os.path.exists(savePath):

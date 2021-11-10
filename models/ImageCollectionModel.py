@@ -6,6 +6,8 @@ class ImageCollectionModel:
         self.path = None # path must pass this check: path == normalizePath(path)
         self.name = None
         self.parentModel = None
+        self.sourceModel = None # the model where this object derive ,when the model is derived model; otherwise, self.
+        self.sourceModelTypeName = None
 
     @abstractmethod
     def length(self):

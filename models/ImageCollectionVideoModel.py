@@ -15,6 +15,8 @@ if sys.platform == 'darwin' or sys.platform == 'win32':
             self.path = path
             self.name = name
             self.parentModel = parentModel
+            self.sourceModel = self
+            self.sourceModelTypeName = 'video'
 
             try:
                 self.vr = VideoReader(self.path, ctx=cpu(0))
