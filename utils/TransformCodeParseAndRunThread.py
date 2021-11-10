@@ -1,4 +1,3 @@
-from models.ImageCollectionCloudModel import ImageCollectionCloudModel
 from utils.RemoteServerManager import remoteServerManager
 from utils.TransformCodeInterpreter import TransformCodeInterpreter
 from models.ImageCollectionModel import ImageCollectionModel

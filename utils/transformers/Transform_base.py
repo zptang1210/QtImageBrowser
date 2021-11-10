@@ -3,7 +3,6 @@ import time
 import traceback
 from abc import abstractmethod
 from utils.pathUtils import normalizePath
-from models.ImageCollectionFolderModel import ImageCollectionFolderModel
 
 class Transform_base:
     command = None

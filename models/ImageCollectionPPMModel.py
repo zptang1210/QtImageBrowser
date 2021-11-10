@@ -1,7 +1,7 @@
 import os
 from utils.pathUtils import normalizePath
 from models.ImageCollectionBasicModel import ImageCollectionBasicModel
-from utils import PPMProcessor
+from utils import PPMUtils
 
 class ImageCollectionPPMModel(ImageCollectionBasicModel):
     def __init__(self, path, name, parentModel=None):
@@ -14,7 +14,7 @@ class ImageCollectionPPMModel(ImageCollectionBasicModel):
         self.sourceModelTypeName = 'ppm'
 
         try:
-            self.imgList = PPMProcessor.readSuperPPM(self.path)
+            self.imgList = PPMUtils.readSuperPPM(self.path)
         except:
             raise RuntimeError('Unable to load the ppm file.')
 
@@ -54,5 +54,5 @@ class ImageCollectionPPMModel(ImageCollectionBasicModel):
             if img_np.shape != img_shape:
                 return False
         
-        PPMProcessor.writeSuperPPM(img_list, savePath, numPerRow=numPerRow)
+        PPMUtils.writeSuperPPM(img_list, savePath, numPerRow=numPerRow)
         return True

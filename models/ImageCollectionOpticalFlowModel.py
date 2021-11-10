@@ -1,6 +1,5 @@
 import os
 from glob import glob
-from models.ImageCollectionDerivedModel import ImageCollectionDerivedModel
 import utils.opticalFlowUtils as ofUtils
 from utils.pathUtils import normalizePath
 from models.ImageCollectionCompoundModel import ImageCollectionCompoundModel

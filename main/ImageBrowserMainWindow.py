@@ -7,7 +7,7 @@ from main.ImageCollectionOpenDialog import ImageCollectionOpenDialog
 from models.ImageCollectionCloudModel import ImageCollectionCloudModel
 from utils.SaveImageCollection import SaveImageCollection
 from utils.pathUtils import getPathType, normalizePath, PathType
-from configs.availTypesConfig import availTypes, modelClassDict, modelNameDict
+from configs.availTypesConfig import availTypes, modelClassDict
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):

@@ -6,7 +6,6 @@ from utils.TransformCodeParseAndRunThread import TransformCodeParseAndRunThread
 from models.ImageCollectionSubModel import ImageCollectionSubModel
 from main.TransformDialog import TransformDialog
 from utils.PresetManager import PresetManager
-from configs.availTypesConfig import modelNameDict
 
 class ImageViewerWidget(QtWidgets.QWidget):
     maxLabelNum = 3

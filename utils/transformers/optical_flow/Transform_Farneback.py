@@ -1,7 +1,6 @@
 import cv2
 from utils.transformers.optical_flow.Transform_opticalFlowFramework import Transform_opticalFlowFramework
 
-
 class Transform_Farneback(Transform_opticalFlowFramework):
     command = 'farneback'
 

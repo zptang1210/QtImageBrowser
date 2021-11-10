@@ -1,7 +1,6 @@
 import pexpect
 from pexpect.exceptions import TIMEOUT, EOF
 from utils.PasswdManager import passwdManager
-from utils.RemoteServerManager import remoteServerManager
 from utils.pathUtils import PathType, getPathType, parseServerPath
 
 def rsync(srcPath, destPath):
