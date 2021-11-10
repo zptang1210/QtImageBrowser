@@ -183,7 +183,7 @@ class TransformCodeInterpreter:
         processorFile = os.path.join(server.get_processor_path(), 'transform_backend.py')
 
         # model_path and model_type
-        # TODO: upload the local model to the corresponding server, and use the path on the server to run the script
+        # upload the local model to the corresponding server, and use the path on the server to run the script
         # if the model is a cloud model, use localPath instead of the path.
         try:
             modelType = model.sourceModelTypeName

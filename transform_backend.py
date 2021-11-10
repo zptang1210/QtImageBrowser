@@ -85,8 +85,11 @@ def runTransform(output=sys.stderr):
 
 if __name__ == '__main__':
     # python transform.py --model_path=/home/zhipengtang/testData/batch_00002_0 --model_type=folder --script_file=./script.txt --result_name=tmp
+    log_folder_path = os.path.join('.', 'log')
+    if not os.path.exists(log_folder_path):
+        os.makedirs(log_folder_path)
     logFileName = 'log_' + '_'.join(time.ctime().split()) + '.txt'
-    with open(os.path.join('.', 'log', logFileName), 'w') as fout:
+    with open(os.path.join(log_folder_path, logFileName), 'w') as fout:
         fout.write(' '. join(sys.argv) + '\n')
         flag, path, name, typeName = runTransform(output=fout)
         print('transform_finished', int(flag), path, name, typeName, file=fout)
