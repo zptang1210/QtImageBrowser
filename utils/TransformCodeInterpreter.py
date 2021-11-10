@@ -188,7 +188,7 @@ class TransformCodeInterpreter:
         try:
             modelType = None
             if isinstance(model, ImageCollectionCloudModel):
-                modelType = model.type
+                modelType = model.sourceModelTypeName
             else:
                 modelType = modelNameDict[type(model)]
 
@@ -214,9 +214,6 @@ class TransformCodeInterpreter:
         else:
             print('model uploading succeeded.')
             modelPath = tempModelServerPath
-
-        # modelPath = model.getRootPath().split(':')[1]
-        # modelType = model.type
 
         # resultName
         resultName = newCollectionName
