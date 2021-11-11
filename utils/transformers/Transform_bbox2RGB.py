@@ -27,7 +27,7 @@ class Transform_bbox2RGB(Transform_toBasicModel):
             img_name = model.getImgName(i)
         
             if args.mode == 'default':
-                yield model.getImg(0), img_name
+                yield model.getImg(i), img_name
             elif args.mode == 'bboxfixed':
                 first_img_size = ((model.getData(0))[0]).shape # H, W, C
                 init_bbox = (model.getData(0))[1]
