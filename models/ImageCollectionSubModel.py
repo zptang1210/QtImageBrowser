@@ -2,37 +2,37 @@ from models.ImageCollectionDerivedModel import ImageCollectionDerivedModel
 from configs.availTypesConfig import modelNameDict
 
 class ImageCollectionSubModel(ImageCollectionDerivedModel):
-    def __init__(self, name, subItemIndexes, parentModel):
+    def __init__(self, name, subItemIndexes, srcModel):
         super().__init__()
-        self.parentModel = parentModel
+        self.sourceModel = srcModel
+        self.sourceModelTypeName = modelNameDict[type(self.sourceModel)]
+
+        self.parentModel = None # this property should not be used since we don't add sub models to the tree view widget
         self.path = None
         self.name = name
 
         self.subItemIndexes = subItemIndexes
-
-        self.sourceModel = self.parentModel
-        self.sourceModelTypeName = modelNameDict[type(self.sourceModel)]
 
     def length(self):
         return len(self.subItemIndexes)
 
     def getData(self, idx):
         assert idx >=0 and idx < self.length()
-        return self.parentModel.getData(self.subItemIndexes[idx])
+        return self.sourceModel.getData(self.subItemIndexes[idx])
     
     def getImg(self, idx):
         assert idx >= 0 and idx < self.length()
-        return self.parentModel.getImg(self.subItemIndexes[idx])
+        return self.sourceModel.getImg(self.subItemIndexes[idx])
 
     def getImgName(self, idx):
         assert idx >= 0 and idx < self.length()
-        return self.parentModel.getImgName(self.subItemIndexes[idx])
+        return self.sourceModel.getImgName(self.subItemIndexes[idx])
 
     def getRootPath(self):
         raise NotImplemented()
 
     def getImgInfo(self, idx):
-        return self.parentModel.getImgInfo(self.subItemIndexes[idx])
+        return self.sourceModel.getImgInfo(self.subItemIndexes[idx])
 
     @staticmethod
     def saveModel(modelToSave, savePath):

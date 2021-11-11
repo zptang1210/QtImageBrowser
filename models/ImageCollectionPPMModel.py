@@ -54,5 +54,10 @@ class ImageCollectionPPMModel(ImageCollectionBasicModel):
             if img_np.shape != img_shape:
                 return False
         
-        PPMUtils.writeSuperPPM(img_list, savePath, numPerRow=numPerRow)
-        return True
+        try:
+            PPMUtils.writeSuperPPM(img_list, savePath, numPerRow=numPerRow)
+        except:
+            print('Error occurs during saving ppm file.')
+            return False
+        else:
+            return True

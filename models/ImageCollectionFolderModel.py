@@ -56,9 +56,13 @@ class ImageCollectionFolderModel(ImageCollectionBasicModel):
         else:
             return False
         
-        for idx in range(modelToSave.length()):
-            img_np, name = modelToSave.get(idx)
-            img_pil = Image.fromarray(img_np)
-            img_pil.save(os.path.join(savePath, name+'.jpg'))
-        
-        return True
+        try:
+            for idx in range(modelToSave.length()):
+                img_np, name = modelToSave.get(idx)
+                img_pil = Image.fromarray(img_np)
+                img_pil.save(os.path.join(savePath, name+'.jpg'))
+        except:
+            print('Error occurs during saving images.')
+            return False
+        else:
+            return True

@@ -277,6 +277,7 @@ class ImageViewerWidget(QtWidgets.QWidget):
         self.transformAction.setEnabled(flag)
     
     def setLabelActionEnabled(self, flag):
+        self.labelToolButton.setEnabled(flag)
         for action in self.labelToggleActions.values():
             action.setEnabled(flag)
         for action in self.labelViewActions.values():

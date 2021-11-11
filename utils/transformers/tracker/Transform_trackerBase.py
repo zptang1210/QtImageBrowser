@@ -8,7 +8,7 @@ class Transform_trackerBase(Transform_base):
         super().__init__()
     
     def visualizeImgWithBbox(self, frame, bbox, hide_bbox=False):
-        frame = np.uint8(frame)
+        # frame = np.uint8(frame) #TODO:???
         if not hide_bbox:
             frame = cv2.rectangle(frame,
                                 (bbox[0], bbox[1]),
