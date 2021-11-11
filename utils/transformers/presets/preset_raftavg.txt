@@ -1,1 +1,2 @@
-raft --vis average
+raft
+averageOpticalFlow
