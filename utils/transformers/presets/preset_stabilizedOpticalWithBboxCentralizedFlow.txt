@@ -1,3 +1,4 @@
 #define BBOX selectROI
-ourTracker --bbox [BBOX] --vis=bboxcentralized --hide_bbox True
+ourTracker --bbox [BBOX]
+bbox2RGB --mode=bboxcentralized --hide_bbox True
 raft --vis average

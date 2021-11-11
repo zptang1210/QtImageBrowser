@@ -1,3 +1,5 @@
 #define BBOX selectROI
-ourTracker --bbox [BBOX] --vis=bboxfixed --hide_bbox True
-raft --vis average
+ourTracker --bbox [BBOX] 
+bbox2RGB --mode=bboxfixed --hide_bbox True
+raft
+averageOpticalFlow
