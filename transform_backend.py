@@ -91,8 +91,10 @@ if __name__ == '__main__':
     log_folder_path = os.path.join('.', 'log')
     if not os.path.exists(log_folder_path):
         os.makedirs(log_folder_path)
-    logFileName = 'log_' + '_'.join(time.ctime().split()) + '.txt'
-    logResFileName = 'res_' + '_'.join(time.ctime().split()) + '.txt'
+
+    timestamp = str(time.time())
+    logFileName = 'log_' + timestamp + '.txt'
+    logResFileName = 'res_' + timestamp + '.txt'
 
     with open(os.path.join(log_folder_path, logFileName), 'w') as fout:
         fout.write(' '. join(sys.argv) + '\n')
@@ -103,7 +105,7 @@ if __name__ == '__main__':
             print('transform_finished', flag, '_', file=sys.stdout)
         else:
             flag = 1
-            logResFilePath = os.path.join(log_folder_path, logResFileName)
+            logResFilePath = os.path.abspath(os.path.join(log_folder_path, logResFileName))
             with open(logResFilePath, 'w') as res_fout:
                 res_fout.write(f'{len(modelInfoList)}\n')
                 for i, modelInfo in enumerate(modelInfoList):
