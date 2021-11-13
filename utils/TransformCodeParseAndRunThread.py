@@ -33,21 +33,23 @@ class TransformCodeParseAndRunThread(QtCore.QRunnable):
         else:
             newModelList = self.parser.parseAndRun(self.script, self.model, self.newCollectionName)
 
-         # empty result list, this is a strange behavior
-        if len(newModelList) < 1:
-            print('no model is output. Potential bug here.')
-            self.signals.failed.emit() 
-            return
-
-        # if only the final result is needed, throw out all intermediate results and keep the last model in the list
-        if self.outputIntermediateResults == False:
-            newModelList = newModelList[-1:]
-        
-        # send the results to the callback function
-        if newModelList is not None:
-            self.signals.finished.emit(newModelList)
-        else:
+        # none newModelList, running script failed
+        if newModelList is None:
             self.signals.failed.emit()
+            return 
+        else:
+            # empty result list, this is a strange behavior
+            if len(newModelList) < 1:
+                print('no model is output. Potential bug here.')
+                self.signals.failed.emit() 
+                return
+
+            # if only the final result is needed, throw out all intermediate results and keep the last model in the list
+            if self.outputIntermediateResults == False:
+                newModelList = newModelList[-1:]
+            
+            # send the results to the callback function
+            self.signals.finished.emit(newModelList)
 
     @staticmethod
     def parseAndRun(rawScript, model, newCollectionName, outputIntermediateResults, serverName, threadpool, callback):
