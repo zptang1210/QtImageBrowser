@@ -50,8 +50,8 @@ def createModel(path, name, type):
 
 def runScript(rawCode, model, newCollectionName, rootSavePath):
     interpreter = TransformCodeInterpreter()
-    model = interpreter.parseAndRun(rawCode, model, newCollectionName, rootSavePath=rootSavePath)
-    return model
+    modelList = interpreter.parseAndRun(rawCode, model, newCollectionName, rootSavePath=rootSavePath)
+    return modelList
 
 def runTransform(output=sys.stderr):
     args = argsParser()
@@ -59,28 +59,31 @@ def runTransform(output=sys.stderr):
     flag = checkArgs(args, output=output)
     if not flag: 
         print('invalid args', file=output)
-        return False, None, None, None
+        return None
 
     model = createModel(args.model_path,  str(time.time()), args.model_type)
     if model is None:
         print('failed to load the model', file=output)
-        return False, None, None, None
+        return None
     
     try:
         with open(args.script_file, 'r') as fin:
             rawCode = fin.read()
     except:
         print('failed to read the script', file=output)
-        return False, None, None, None
+        return None
 
     rootSavePath = normalizePath(os.path.join(os.path.dirname(__file__), 'tmp'))
-    model = runScript(rawCode, model, args.result_name, rootSavePath)
-    if model is None:
+    modelList = runScript(rawCode, model, args.result_name, rootSavePath)
+    if modelList is None:
         print('failed to run the script', file=output)
-        return False, None, None, None
+        return None
     
-    return True, model.path, model.name, model.sourceModelTypeName
+    modelInfoList = []
+    for model in modelList:
+        modelInfoList.append({'path': model.path, 'name': model.name, 'type': model.sourceModelTypeName})
 
+    return modelInfoList
 
 
 if __name__ == '__main__':
@@ -89,10 +92,24 @@ if __name__ == '__main__':
     if not os.path.exists(log_folder_path):
         os.makedirs(log_folder_path)
     logFileName = 'log_' + '_'.join(time.ctime().split()) + '.txt'
+    logResFileName = 'res_' + '_'.join(time.ctime().split()) + '.txt'
+
     with open(os.path.join(log_folder_path, logFileName), 'w') as fout:
         fout.write(' '. join(sys.argv) + '\n')
-        flag, path, name, typeName = runTransform(output=fout)
-        print('transform_finished', int(flag), path, name, typeName, file=fout)
+        modelInfoList = runTransform(output=fout)
+        if modelInfoList is None:
+            flag = 0
+            print('transform_finished', flag, '_', file=fout)
+            print('transform_finished', flag, '_', file=sys.stdout)
+        else:
+            flag = 1
+            logResFilePath = os.path.join(log_folder_path, logResFileName)
+            with open(logResFilePath, 'w') as res_fout:
+                res_fout.write(f'{len(modelInfoList)}\n')
+                for i, modelInfo in enumerate(modelInfoList):
+                    modelPath, modelName, modelTypeName = modelInfo['path'], modelInfo['name'], modelInfo['type']
+                    res_fout.write(f'transform_finished {i} {modelPath} {modelName} {modelTypeName}\n')
 
-    print('transform_finished', int(flag), path, name, typeName, file=sys.stdout)
+            print('transform_finished', flag, logResFilePath, file=fout)
+            print('transform_finished', flag, logResFilePath, file=sys.stdout)
     

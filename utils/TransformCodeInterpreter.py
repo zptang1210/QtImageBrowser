@@ -6,10 +6,10 @@ import re
 import traceback
 
 from utils.SaveImageCollection import SaveImageCollection
-from utils.pathUtils import normalizePath
+from utils.pathUtils import constructServerPath, normalizePath
 from utils.RemoteServer import RemoteServer
 from models.ImageCollectionCloudModel import ImageCollectionCloudModel
-from configs.availTypesConfig import modelNameDict
+from utils.rsyncWrapper import rsync
 
 def str_to_raw(s):
     raw_map = {8:r'\b', 7:r'\a', 12:r'\f', 10:r'\n', 13:r'\r', 9:r'\t', 11:r'\v'}
@@ -190,10 +190,6 @@ class TransformCodeInterpreter:
         # if the model is a cloud model, use localPath instead of the path.
         try:
             modelType = model.sourceModelTypeName
-            # if isinstance(model, ImageCollectionCloudModel):
-            #     modelType = model.sourceModelTypeName
-            # else:
-            #     modelType = modelNameDict[type(model)]
 
             modelLocalPath = None
             if isinstance(model, ImageCollectionCloudModel):
@@ -227,35 +223,74 @@ class TransformCodeInterpreter:
         
         # run the generated script on the server
         replace = {'[GENSCRIPT]': genscriptCode, '[RUN]': runCode}
-        expectRe = 'transform_finished (\d) (.*) (.*) (.*)'
+        expectRe = 'transform_finished (\d) (.*)'
         result = server.runTemplateScript(replace, expectRe)
         print('transform result:', result)
-        if result is None: # running failed    
-            server.logout() # log out from the server
+        if result is None: # running failed
+            server.logout()
             return None
+
+        server.logout() # finished using the server for transformation, log out from the server
 
         # parse result
         pattern = re.compile(expectRe)
         m = pattern.match(result)
         flag = int(m.group(1).strip())
-        newPath = m.group(2).strip()
-        newName = m.group(3).strip()
-        newTypeName = m.group(4).strip()
-        
-        # organize the result as a model and return it.
-        newServerPath = f'{server.get_username()}@{server.get_server()}:{newPath}'
+        logResFilePathOnSrv = m.group(2).strip()
 
-        # log out from the server
-        server.logout()
-        
         if flag == 0:
+            print('remote server reports failure of running the script.')
             return None
-        else:
+
+        # download result log file
+        logResFileSrvPath = constructServerPath(serverConfig['server'], serverConfig['username'], logResFilePathOnSrv)
+
+        logResFileLocalSaveFolder = os.path.join('.', 'tmp', 'remote_results')
+        if not os.path.exists(logResFileLocalSaveFolder): os.makedirs(logResFileLocalSaveFolder)
+
+        flag = rsync(logResFileSrvPath, logResFileLocalSaveFolder)
+        if flag == False:
+            print('downloading result log file failed.')
+            return None
+
+        logResFilePathOnLocal = os.path.join(logResFileLocalSaveFolder, os.path.basename(logResFilePathOnSrv))
+
+        # parse result log file
+        newModelInfoList = []
+
+        expectResRe = 'transform_finished (\d) (.*) (.*) (.*)'
+        pattern = re.compile(expectResRe)
+        try:
+            with open(logResFilePathOnLocal, 'r') as fin:
+                resNum = int(fin.readline())
+                for i in range(resNum):
+                    result = fin.readline()
+
+                    m = pattern.match(result)
+                    no = int(m.group(1).strip())
+                    assert no == i
+                    newPath = m.group(2).strip()
+                    newName = m.group(3).strip()
+                    newTypeName = m.group(4).strip()
+
+                    newServerPath = constructServerPath(serverConfig['server'], serverConfig['username'], newPath)
+
+                    newModelInfoList.append({'path': newServerPath, 'name': newName, 'type': newTypeName})
+        except:
+            print(f'parsing result log file {logResFilePathOnLocal} failed.')
+            return None
+            
+        # construct cloud models for return
+        newModelList = []
+        for newModelInfo in newModelInfoList:
+            newServerPath, newName, newTypeName = newModelInfo['path'], newModelInfo['name'], newModelInfo['type']
             try:
                 # don't preload it to save time since it will be load when opening it to the main window
                 newModel = ImageCollectionCloudModel(newServerPath, newName, newTypeName, preload=False)
             except:
-                print('error occurs when creating a cloud model.')
+                print('error occurs when creating a cloud model:', newServerPath)
                 return None
             else:
-                return newModel
+                newModelList.append(newModel)
+
+        return newModelList
