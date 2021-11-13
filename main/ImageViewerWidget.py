@@ -223,19 +223,24 @@ class ImageViewerWidget(QtWidgets.QWidget):
         if self.transformDlg.exec_():
             newCollectionName = self.transformDlg.getName()
             code = self.transformDlg.getCode()
+            outputIntermediateResults = self.transformDlg.getOutputIntermediateResult()
             processingSrv = self.transformDlg.getSelectedProcessingServer()
             self.transformDlg.resetName()
 
-            TransformCodeParseAndRunThread.parseAndRun(code, self.model, newCollectionName, processingSrv, self.threadpool, self.transformFinishedCallback)
+            TransformCodeParseAndRunThread.parseAndRun(code, self.model, newCollectionName, outputIntermediateResults, processingSrv, self.threadpool, self.transformFinishedCallback)
         else:
             self.transformDlg.resetNameAndCode()
 
-    def transformFinishedCallback(self, newModel):
-        if newModel is not None:
-            newModelTypeName = newModel.sourceModelTypeName
-            flag = self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + '_temp', type=newModelTypeName, parentModel=self.model)
-            if flag:
-                QtWidgets.QMessageBox.information(self, 'Info', f'The new image collection {newModel.name} has been opened.', QtWidgets.QMessageBox.Ok)
+    def transformFinishedCallback(self, newModelList):
+        if newModelList is not None:
+            succeeded = True
+            for newModel in newModelList:
+                newModelTypeName = newModel.sourceModelTypeName
+                flag = self.parent.parent.createAndAddNewImageCollection(newModel.path, newModel.name + '_temp', type=newModelTypeName, parentModel=self.model)
+                if flag == False:
+                    succeeded = False
+                    break
+            if succeeded: QtWidgets.QMessageBox.information(self, 'Info', f'The new image collection {newModelList[-1].name} has been opened.', QtWidgets.QMessageBox.Ok)
         else:
             QtWidgets.QMessageBox.warning(self, 'Warning', 'Failed to run the commands!', QtWidgets.QMessageBox.Ok)
             
@@ -315,9 +320,10 @@ class ImageViewerWidget(QtWidgets.QWidget):
         if self.transformDlg.exec_():
             newCollectionName = self.transformDlg.getName()
             code = self.transformDlg.getCode()
+            outputIntermediateResults = self.transformDlg.getOutputIntermediateResult()
             processingSrv = self.transformDlg.getSelectedProcessingServer()
             self.transformDlg.resetName()
 
-            TransformCodeParseAndRunThread.parseAndRun(code, self.model, newCollectionName, processingSrv, self.threadpool, self.transformFinishedCallback)
+            TransformCodeParseAndRunThread.parseAndRun(code, self.model, newCollectionName, outputIntermediateResults, processingSrv, self.threadpool, self.transformFinishedCallback)
         else:
             self.transformDlg.resetNameAndCode()

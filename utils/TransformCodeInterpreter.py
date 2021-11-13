@@ -131,21 +131,24 @@ class TransformCodeInterpreter:
             print('invalid rootSavePath.')
             return None
 
+        modelList = []
         try:
             for i, (command, modulePath, className, argsList) in enumerate(code):
                 module = importlib.import_module(modulePath)
                 classMeta = getattr(module, className)
                 transformer = classMeta()
 
-                saveName = newCollectionName if i == len(code) - 1 else None
+                saveName = newCollectionName if i == len(code) - 1 else f'{newCollectionName}_step_{i}_{time.time()}'
                 model = transformer.run(model, argsList, rootSavePath=rootSavePath, saveName=saveName)
                 if model is None:
                     return None
+                else:
+                    modelList.append(model)
         except:
             print('running script failed.', traceback.format_exc())
             return None
 
-        return model
+        return modelList
 
 
     def getScriptWoMacros(self, rawCode, model):

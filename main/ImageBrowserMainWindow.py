@@ -50,7 +50,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.imageCollectionModels.pop(model.path)
                 return False
         else:
-            QtWidgets.QMessageBox.information(self, 'Info', 'Error occurs during openning the image collection. (e.g. this image collection has already been opened.)', QtWidgets.QMessageBox.Ok)
+            QtWidgets.QMessageBox.information(self, 'Info', 'Error occurs during openning the image collection. \n(this image collection has probably already been opened.)', QtWidgets.QMessageBox.Ok)
             return False
 
 
