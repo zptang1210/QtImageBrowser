@@ -175,8 +175,9 @@ class TransformCodeInterpreter:
             return None
 
         # scriptPath
-        randomScriptName = f'script_{time.time()}.txt'
-        scriptPath = os.path.join(server.get_processor_path(), 'tmp', 'scripts', randomScriptName)
+        randomScriptName = f'script_{time.time()}'
+        scriptPath = os.path.join(server.get_processor_path(), 'tmp', 'scripts', randomScriptName+'.txt')
+        logPath = os.path.join(server.get_processor_path(), 'log', 'log_'+randomScriptName+'.txt')
 
         # [GENSCRIPT]
         genscriptCode = f'echo -e "{str_to_raw(rawCode)}" > {scriptPath}'
@@ -218,7 +219,7 @@ class TransformCodeInterpreter:
         resultName = newCollectionName
 
         # [RUN]
-        runCode = f'python {processorFile} --model_path={modelPath} --model_type={modelType} --script_file={scriptPath} --result_name={resultName}'
+        runCode = f'python {processorFile} --model_path={modelPath} --model_type={modelType} --script_file={scriptPath} --result_name={resultName} | tee {logPath}'
         print('[RUN]', runCode)
         
         # run the generated script on the server

@@ -81,7 +81,7 @@ class RemoteServer:
                 
                 self.server.sendline(line)
                 if not keyLine:
-                    self.server.prompt(timeout=timeout)
+                    self.server.prompt(timeout=timeout//2)
                 else:
                     i = self.server.expect([expectRe, '[Ee]rror', '[Ff]ailed', '[Ee]xception'], timeout=timeout)
                     if i != 0:

@@ -93,7 +93,7 @@ if __name__ == '__main__':
         os.makedirs(log_folder_path)
 
     timestamp = str(time.time())
-    logFileName = 'log_' + timestamp + '.txt'
+    logFileName = 'log_stdout_' + timestamp + '.txt'
     logResFileName = 'res_' + timestamp + '.txt'
 
     with open(os.path.join(log_folder_path, logFileName), 'w') as fout:
