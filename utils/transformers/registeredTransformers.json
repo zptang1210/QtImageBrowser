@@ -5,5 +5,8 @@
     "pwcnet": ["utils.transformers.optical_flow.Transform_PWCNET", "Transform_PWCNET"],
     "raft": ["utils.transformers.optical_flow.Transform_RAFT", "Transform_RAFT"],
     "mode": ["utils.transformers.Transform_modeSubtract", "Transform_modeSubtract"],
-    "average": ["utils.transformers.Transform_average", "Transform_average"]
+    "average": ["utils.transformers.Transform_average", "Transform_average"],
+    "farneback": ["utils.transformers.optical_flow.Transform_Farneback", "Transform_Farneback"],
+    "averageOpticalFlow": ["utils.transformers.Transform_averageOpticalFlow", "Transform_averageOpticalFlow"],
+    "bbox2RGB": ["utils.transformers.Transform_bbox2RGB", "Transform_bbox2RGB"]
 }

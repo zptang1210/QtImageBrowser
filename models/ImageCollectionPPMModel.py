@@ -1,18 +1,20 @@
 import os
 from utils.pathUtils import normalizePath
-from models.ImageCollectionModel import ImageCollectionModel
-from utils import PPMProcessor
+from models.ImageCollectionBasicModel import ImageCollectionBasicModel
+from utils import PPMUtils
 
-class ImageCollectionPPMModel(ImageCollectionModel):
+class ImageCollectionPPMModel(ImageCollectionBasicModel):
     def __init__(self, path, name, parentModel=None):
         super().__init__()
         assert path == normalizePath(path)
         self.path = path
         self.name = name
         self.parentModel = parentModel
+        self.sourceModel = self
+        self.sourceModelTypeName = 'ppm'
 
         try:
-            self.imgList = PPMProcessor.readSuperPPM(self.path)
+            self.imgList = PPMUtils.readSuperPPM(self.path)
         except:
             raise RuntimeError('Unable to load the ppm file.')
 
@@ -52,5 +54,10 @@ class ImageCollectionPPMModel(ImageCollectionModel):
             if img_np.shape != img_shape:
                 return False
         
-        PPMProcessor.writeSuperPPM(img_list, savePath, numPerRow=numPerRow)
-        return True
+        try:
+            PPMUtils.writeSuperPPM(img_list, savePath, numPerRow=numPerRow)
+        except:
+            print('Error occurs during saving ppm file.')
+            return False
+        else:
+            return True

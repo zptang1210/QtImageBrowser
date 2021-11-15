@@ -1,5 +1,5 @@
 import os, sys
-from models.ImageCollectionModel import ImageCollectionModel
+from models.ImageCollectionBasicModel import ImageCollectionBasicModel
 from utils.pathUtils import normalizePath
 
 if sys.platform == 'darwin' or sys.platform == 'win32':
@@ -8,13 +8,15 @@ if sys.platform == 'darwin' or sys.platform == 'win32':
     from decord import VideoReader
     from decord import cpu
 
-    class ImageCollectionVideoModel(ImageCollectionModel):
+    class ImageCollectionVideoModel(ImageCollectionBasicModel):
         def __init__(self, path, name, parentModel=None):
             super().__init__()
             assert path == normalizePath(path)
             self.path = path
             self.name = name
             self.parentModel = parentModel
+            self.sourceModel = self
+            self.sourceModelTypeName = 'video'
 
             try:
                 self.vr = VideoReader(self.path, ctx=cpu(0))
@@ -67,13 +69,15 @@ elif sys.platform.startswith('linux'):
     import cv2
     os.environ.pop("QT_QPA_PLATFORM_PLUGIN_PATH") # https://stackoverflow.com/questions/63829991/qt-qpa-plugin-could-not-load-the-qt-platform-plugin-xcb-in-even-though-it
 
-    class ImageCollectionVideoModel(ImageCollectionModel):
+    class ImageCollectionVideoModel(ImageCollectionBasicModel):
         def __init__(self, path, name, parentModel=None):
             super().__init__()
             assert path == normalizePath(path)
             self.path = path
             self.name = name
             self.parentModel = parentModel
+            self.sourceModel = self
+            self.sourceModelTypeName = 'video'
 
             # open the video
             self.cap = cv2.VideoCapture(self.path)

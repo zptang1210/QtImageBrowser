@@ -6,11 +6,14 @@ import re
 import traceback
 
 from utils.SaveImageCollection import SaveImageCollection
-from utils.pathUtils import normalizePath
+from utils.pathUtils import constructServerPath, normalizePath
 from utils.RemoteServer import RemoteServer
-from utils.strToRaw import str_to_raw
 from models.ImageCollectionCloudModel import ImageCollectionCloudModel
-from configs.availTypesConfig import modelNameDict
+from utils.rsyncWrapper import rsync
+
+def str_to_raw(s):
+    raw_map = {8:r'\b', 7:r'\a', 12:r'\f', 10:r'\n', 13:r'\r', 9:r'\t', 11:r'\v'}
+    return r''.join(i if ord(i) > 32 else raw_map.get(ord(i), i) for i in s)
 
 class TransformCodeInterpreter:
     def __init__(self):
@@ -128,21 +131,24 @@ class TransformCodeInterpreter:
             print('invalid rootSavePath.')
             return None
 
+        modelList = []
         try:
             for i, (command, modulePath, className, argsList) in enumerate(code):
                 module = importlib.import_module(modulePath)
                 classMeta = getattr(module, className)
                 transformer = classMeta()
 
-                saveName = newCollectionName if i == len(code) - 1 else None
+                saveName = newCollectionName if i == len(code) - 1 else f'{newCollectionName}_step_{i}_{time.time()}'
                 model = transformer.run(model, argsList, rootSavePath=rootSavePath, saveName=saveName)
                 if model is None:
                     return None
+                else:
+                    modelList.append(model)
         except:
             print('running script failed.', traceback.format_exc())
             return None
 
-        return model
+        return modelList
 
 
     def getScriptWoMacros(self, rawCode, model):
@@ -169,8 +175,9 @@ class TransformCodeInterpreter:
             return None
 
         # scriptPath
-        randomScriptName = f'script_{time.time()}.txt'
-        scriptPath = os.path.join(server.get_processor_path(), 'tmp', 'scripts', randomScriptName)
+        randomScriptName = f'script_{time.time()}'
+        scriptPath = os.path.join(server.get_processor_path(), 'tmp', 'scripts', randomScriptName+'.txt')
+        logPath = os.path.join(server.get_processor_path(), 'log', 'log_'+randomScriptName+'.txt')
 
         # [GENSCRIPT]
         genscriptCode = f'echo -e "{str_to_raw(rawCode)}" > {scriptPath}'
@@ -180,14 +187,10 @@ class TransformCodeInterpreter:
         processorFile = os.path.join(server.get_processor_path(), 'transform_backend.py')
 
         # model_path and model_type
-        # TODO: upload the local model to the corresponding server, and use the path on the server to run the script
+        # upload the local model to the corresponding server, and use the path on the server to run the script
         # if the model is a cloud model, use localPath instead of the path.
         try:
-            modelType = None
-            if isinstance(model, ImageCollectionCloudModel):
-                modelType = model.type
-            else:
-                modelType = modelNameDict[type(model)]
+            modelType = model.sourceModelTypeName
 
             modelLocalPath = None
             if isinstance(model, ImageCollectionCloudModel):
@@ -212,46 +215,83 @@ class TransformCodeInterpreter:
             print('model uploading succeeded.')
             modelPath = tempModelServerPath
 
-        # modelPath = model.getRootPath().split(':')[1]
-        # modelType = model.type
-
         # resultName
         resultName = newCollectionName
 
         # [RUN]
-        runCode = f'python {processorFile} --model_path={modelPath} --model_type={modelType} --script_file={scriptPath} --result_name={resultName}'
+        runCode = f'python {processorFile} --model_path={modelPath} --model_type={modelType} --script_file={scriptPath} --result_name={resultName} | tee {logPath}'
         print('[RUN]', runCode)
         
         # run the generated script on the server
         replace = {'[GENSCRIPT]': genscriptCode, '[RUN]': runCode}
-        expectRe = 'transform_finished (\d) (.*) (.*)'
+        expectRe = 'transform_finished (\d) (.*)'
         result = server.runTemplateScript(replace, expectRe)
         print('transform result:', result)
-        if result is None: # running failed    
-            server.logout() # log out from the server
+        if result is None: # running failed
+            server.logout()
             return None
+
+        server.logout() # finished using the server for transformation, log out from the server
 
         # parse result
         pattern = re.compile(expectRe)
         m = pattern.match(result)
         flag = int(m.group(1).strip())
-        newPath = m.group(2).strip()
-        newName = m.group(3).strip()
-        
-        # organize the result as a model and return it.
-        newServerPath = f'{server.get_username()}@{server.get_server()}:{newPath}'
+        logResFilePathOnSrv = m.group(2).strip()
 
-        # log out from the server
-        server.logout()
-        
         if flag == 0:
+            print('remote server reports failure of running the script.')
             return None
-        else:
+
+        # download result log file
+        logResFileSrvPath = constructServerPath(serverConfig['server'], serverConfig['username'], logResFilePathOnSrv)
+
+        logResFileLocalSaveFolder = os.path.join('.', 'tmp', 'remote_results')
+        if not os.path.exists(logResFileLocalSaveFolder): os.makedirs(logResFileLocalSaveFolder)
+
+        flag = rsync(logResFileSrvPath, logResFileLocalSaveFolder)
+        if flag == False:
+            print('downloading result log file failed.')
+            return None
+
+        logResFilePathOnLocal = os.path.join(logResFileLocalSaveFolder, os.path.basename(logResFilePathOnSrv))
+
+        # parse result log file
+        newModelInfoList = []
+
+        expectResRe = 'transform_finished (\d) (.*) (.*) (.*)'
+        pattern = re.compile(expectResRe)
+        try:
+            with open(logResFilePathOnLocal, 'r') as fin:
+                resNum = int(fin.readline())
+                for i in range(resNum):
+                    result = fin.readline()
+
+                    m = pattern.match(result)
+                    no = int(m.group(1).strip())
+                    assert no == i
+                    newPath = m.group(2).strip()
+                    newName = m.group(3).strip()
+                    newTypeName = m.group(4).strip()
+
+                    newServerPath = constructServerPath(serverConfig['server'], serverConfig['username'], newPath)
+
+                    newModelInfoList.append({'path': newServerPath, 'name': newName, 'type': newTypeName})
+        except:
+            print(f'parsing result log file {logResFilePathOnLocal} failed.')
+            return None
+            
+        # construct cloud models for return
+        newModelList = []
+        for newModelInfo in newModelInfoList:
+            newServerPath, newName, newTypeName = newModelInfo['path'], newModelInfo['name'], newModelInfo['type']
             try:
                 # don't preload it to save time since it will be load when opening it to the main window
-                newModel = ImageCollectionCloudModel(newServerPath, newName, 'folder', preload=False)
+                newModel = ImageCollectionCloudModel(newServerPath, newName, newTypeName, preload=False)
             except:
-                print('error occurs when creating a cloud model.')
+                print('error occurs when creating a cloud model:', newServerPath)
                 return None
             else:
-                return newModel
+                newModelList.append(newModel)
+
+        return newModelList

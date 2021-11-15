@@ -21,7 +21,6 @@ class ImageCollectionSelectionDialog(QtWidgets.QDialog):
 
         self.layout.addWidget(QtWidgets.QLabel('Select type: '), 0, 0, 1, 1)
         self.typeComboBox = QtWidgets.QComboBox(self)
-        self.typeComboBox.addItems(availTypes)
         self.layout.addWidget(self.typeComboBox, 0, 1, 1, 2)
 
         self.layout.addWidget(QtWidgets.QLabel('Input name: '), 1, 0, 1, 1)
@@ -53,7 +52,7 @@ class ImageCollectionSelectionDialog(QtWidgets.QDialog):
         self.setLayout(self.layout)
 
     def locComboBoxIdxChanged(self, idx):
-        if idx == 0: # Path is probably for local machine, enable select button (path can also be in scp format)
+        if idx == 0: # Path is probably for local machine, enable select button (path can also be in the scp format)
             self.fileDialogButton.setEnabled(True)
         else:
             self.fileDialogButton.setEnabled(False)

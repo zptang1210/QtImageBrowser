@@ -1,7 +1,7 @@
 import numpy as np
-from utils.transformers.Transform_base import Transform_base
+from utils.transformers.Transform_toBasicModel import Transform_toBasicModel
 
-class Transform_average(Transform_base):
+class Transform_average(Transform_toBasicModel):
     command = 'average'
 
     def __init__(self):

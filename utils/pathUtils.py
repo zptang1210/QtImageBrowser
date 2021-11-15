@@ -31,3 +31,6 @@ def parseServerPath(path):
     userName, serverName = srvFullName.split('@')
 
     return userName, serverName, actualPath
+
+def constructServerPath(serverName, userName, serverPath):
+    return f'{userName}@{serverName}:{serverPath}'

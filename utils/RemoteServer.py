@@ -25,9 +25,13 @@ class RemoteServer:
         print('pxssh is trying to log into the server.')
         try:
             self.server = pxssh.pxssh()
-            self.server.force_password = True # TODO: support password login only for now
-            passwd = passwdManager.getPasswd((self.config['server'], self.config['username']))
-            self.server.login(server=self.config['server'], username=self.config['username'], password=passwd, sync_multiplier=5)
+            # self.server.force_password = True # TODO: support password login only for now
+            if self.config['auth_method'] == 'password':
+                passwd = passwdManager.getPasswd((self.config['server'], self.config['username']))
+                self.server.login(server=self.config['server'], username=self.config['username'], password=passwd, sync_multiplier=5)
+            else:
+                privateKeyPath = self.config['key_file']
+                self.server.login(server=self.config['server'], username=self.config['username'], ssh_key=privateKeyPath, sync_multiplier=5)
         except pxssh.ExceptionPexpect as e:
             print('pxssh failed.', e)
             passwdManager.invalidateStoredPasswd((self.config['server'], self.config['username']))
@@ -77,7 +81,7 @@ class RemoteServer:
                 
                 self.server.sendline(line)
                 if not keyLine:
-                    self.server.prompt(timeout=timeout)
+                    self.server.prompt(timeout=timeout//2)
                 else:
                     i = self.server.expect([expectRe, '[Ee]rror', '[Ff]ailed', '[Ee]xception'], timeout=timeout)
                     if i != 0:

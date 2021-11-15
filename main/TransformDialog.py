@@ -32,7 +32,14 @@ class TransformDialog(QtWidgets.QDialog):
         self.locComboBox.addItems(self.locationList)
         self.layout.addWidget(self.locComboBox, 2, 1)
 
-        self.layout.addWidget(self.buttonBox, 3, 1)
+        self.layout.addWidget(QtWidgets.QLabel('Output:'), 3, 0)
+        self.outputInterResComboBox = QtWidgets.QComboBox(self)
+        self.outputInterResOptions = ['only the final result', 'all intermediate results']
+        self.outputInterResComboBox.addItems(self.outputInterResOptions)
+        self.outputInterResComboBox.setCurrentIndex(0)
+        self.layout.addWidget(self.outputInterResComboBox, 3, 1)
+
+        self.layout.addWidget(self.buttonBox, 4, 1)
 
         self.layout.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
         self.setLayout(self.layout)
@@ -69,6 +76,15 @@ class TransformDialog(QtWidgets.QDialog):
             return None
         else:
             return selected
+
+    def getOutputIntermediateResult(self):
+        idx = self.outputInterResComboBox.currentIndex()
+        if idx == 0: # output the final result only
+            return False
+        elif idx == 1: # output all intermediate resutls
+            return True
+        else:
+            return False
 
     def resetNameAndCode(self):
         self.resetName()

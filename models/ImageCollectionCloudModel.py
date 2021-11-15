@@ -1,11 +1,11 @@
 import os
-from utils.pathUtils import normalizePath, getPathType, PathType
-from models.ImageCollectionModel import ImageCollectionModel
+from utils.pathUtils import normalizePath, getPathType, PathType, parseServerPath
+from models.ImageCollectionDerivedModel import ImageCollectionDerivedModel
 from utils.rsyncWrapper import rsync
-from configs.availTypesConfig import availTypes
+from configs.availTypesConfig import FileType, TypeProperty, availTypes
 from configs.availTypesConfig import modelClassDict
 
-class ImageCollectionCloudModel(ImageCollectionModel):
+class ImageCollectionCloudModel(ImageCollectionDerivedModel):
     DEFAULT_LOCAL_ROOT_PATH = normalizePath(os.path.join('.', 'tmp'))
 
     def __init__(self, path, name, type, localPath=None, preload=True, parentModel=None):
@@ -13,8 +13,8 @@ class ImageCollectionCloudModel(ImageCollectionModel):
         self.path = path # server path
         assert getPathType(self.path) == PathType.Server
         self.name = name
-        self.type = type
-        assert self.type in availTypes
+        self.sourceModelTypeName = type
+        assert self.sourceModelTypeName in availTypes
         self.parentModel = parentModel
 
         if localPath is None:
@@ -24,12 +24,13 @@ class ImageCollectionCloudModel(ImageCollectionModel):
         assert getPathType(self.localPath) == PathType.Local
         self.localPath = normalizePath(self.localPath)
 
-        self.serverAddr = self.path.split(':')[0]
+        usrName, srvName, _ = parseServerPath(self.path)
+        self.serverAddr = usrName + '@' + srvName
         
         if preload:
             flag = self.load(self.path, self.localPath)
             if flag == False:
-                raise RuntimeError('Unable to load the image collection from the server.')
+                raise RuntimeError('Unable to download the image collection from the server.')
 
             self.model = self.getModel()
             if self.model is None:
@@ -40,9 +41,11 @@ class ImageCollectionCloudModel(ImageCollectionModel):
             self.loaded = False
             self.model = None
 
+        self.sourceModel = self.model
+
 
     def load(self, serverPath, localPath):
-        if self.type == 'folder' and not serverPath.endswith('/'):
+        if TypeProperty[self.sourceModelTypeName]['fileType'] == FileType.folder and not serverPath.endswith('/'):
             serverPath = serverPath + '/' # copy all files in the folder to the local path, exluding the folder structure
 
         flag = rsync(serverPath, localPath)
@@ -54,7 +57,7 @@ class ImageCollectionCloudModel(ImageCollectionModel):
 
     def getModel(self):
         try:
-            modelClass = modelClassDict[self.type]
+            modelClass = modelClassDict[self.sourceModelTypeName]
             model = modelClass(self.localPath, self.name, parentModel=self.parentModel)
         except:
             return None
@@ -64,6 +67,10 @@ class ImageCollectionCloudModel(ImageCollectionModel):
     def length(self):
         assert self.loaded
         return self.model.length()
+
+    def getData(self, idx):
+        assert self.loaded
+        return self.model.getData(idx)
     
     def getImg(self, idx):
         assert self.loaded
@@ -81,10 +88,10 @@ class ImageCollectionCloudModel(ImageCollectionModel):
         rootPath = self.getRootPath()
         idx = idx
 
-        if self.type == 'folder':
+        if self.sourceModelTypeName == 'folder':
             imgFileName = os.path.split(self.model.getImgInfo(idx)['path'])[1]
             path = os.path.join(rootPath, imgFileName)
-        elif self.type == 'video' or self.type == 'ppm':
+        elif self.sourceModelTypeName == 'video' or self.sourceModelTypeName == 'ppm':
             path = rootPath + f':{idx}'
         
         return {'idx': idx, 'path': path, 'rootPath': rootPath}

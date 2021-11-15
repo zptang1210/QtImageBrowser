@@ -1,10 +1,10 @@
 import argparse
 import numpy as np
 from PIL import Image
-from utils.transformers.Transform_base import Transform_base
+from utils.transformers.Transform_toBasicModel import Transform_toBasicModel
 
 
-class Transform_cvtColor(Transform_base):
+class Transform_cvtColor(Transform_toBasicModel):
     command = 'cvtColor'
 
     def __init__(self):

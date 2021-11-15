@@ -3,8 +3,6 @@ import time
 import traceback
 from abc import abstractmethod
 from utils.pathUtils import normalizePath
-from PIL import Image
-from models.ImageCollectionFolderModel import ImageCollectionFolderModel
 
 class Transform_base:
     command = None
@@ -14,6 +12,10 @@ class Transform_base:
 
     @abstractmethod
     def getArgParser(self):
+        pass
+
+    @abstractmethod
+    def generateProcessedModel(fileGenerator, savePath, saveName):
         pass
 
     @abstractmethod
@@ -45,24 +47,17 @@ class Transform_base:
                 print('Path already exists...')
                 return None
             else: os.makedirs(savePath)
-            for img_np, img_name in self.processImageCollection(model, self.args):
-                img_pil = Image.fromarray(img_np)
-                img_pil.save(os.path.join(savePath, img_name+'.jpg'))
+
+            newModel = self.generateProcessedModel(self.processImageCollection(model, self.args), savePath, saveName)
         except ValueError as e:
-            print('Error occured during running transformation due to unknown arguments.')
+            print('Error occured during running transformation probably due to unknown arguments.')
             print(e, '\n', traceback.format_exc())
             shutil.rmtree(savePath)
             return None
         except Exception as e:
-            print('Unknown error occured during running transformation.')
+            print('Unknown error occured during running transformation and creating a new model.')
             print(e, '\n', traceback.format_exc())
             shutil.rmtree(savePath)
-            return None
-        
-        try:
-            newModel = ImageCollectionFolderModel(savePath, saveName)
-        except:
-            print('Failed to create a new model to hold results.')
             return None
         else:
             return newModel 

@@ -7,8 +7,7 @@ from main.ImageCollectionOpenDialog import ImageCollectionOpenDialog
 from models.ImageCollectionCloudModel import ImageCollectionCloudModel
 from utils.SaveImageCollection import SaveImageCollection
 from utils.pathUtils import getPathType, normalizePath, PathType
-from configs.availTypesConfig import availTypes
-from configs.availTypesConfig import modelClassDict
+from configs.availTypesConfig import availTypes, modelClassDict
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -51,7 +50,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.imageCollectionModels.pop(model.path)
                 return False
         else:
-            QtWidgets.QMessageBox.information(self, 'Info', 'Error occurs during openning the image collection. (e.g. this image collection has already been opened.)', QtWidgets.QMessageBox.Ok)
+            QtWidgets.QMessageBox.information(self, 'Info', 'Error occurs during openning the image collection. \n(this image collection has probably already been opened.)', QtWidgets.QMessageBox.Ok)
             return False
 
 
@@ -132,7 +131,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
 
     def saveAndOpenCollection(self, modelToSave):
-        diag = ImageCollectionSaveDialog(self)
+        modelToSaveTypeName = modelToSave.sourceModelTypeName
+        diag = ImageCollectionSaveDialog(modelToSaveTypeName=modelToSaveTypeName, parent=self)
         if diag.exec_():
             path = diag.getPath()
             name = diag.getName()

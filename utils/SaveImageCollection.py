@@ -2,7 +2,7 @@ import os
 from PyQt5 import QtCore
 from utils.pathUtils import getPathType, PathType
 from utils.rsyncWrapper import rsync
-from configs.availTypesConfig import availTypes
+from configs.availTypesConfig import FileType, TypeProperty, availTypes
 from configs.availTypesConfig import modelClassDict
 
 class SaveSignals(QtCore.QObject):
@@ -30,7 +30,7 @@ class SaveImageCollection(QtCore.QRunnable):
             tmp_savePath = os.path.join('.', 'tmp', saveName)
             flag = modelClassDict[self.targetType].saveModel(self.modelToSave, tmp_savePath)
             if not flag:
-                self.signals.finished.emit(flag)
+                self.signals.finished.emit(False) # failed to save the model
             else:
                 flag_upload = SaveImageCollection.upload(tmp_savePath, self.savePath, self.targetType)
                 self.signals.finished.emit(flag_upload)
@@ -39,8 +39,8 @@ class SaveImageCollection(QtCore.QRunnable):
 
     @staticmethod
     def upload(localPath, serverPath, fileType):
-        if fileType == 'folder' and not localPath.endswith('/'):
-            localPath = localPath + '/'
+        if TypeProperty[fileType]['fileType'] == FileType.folder and not localPath.endswith('/'):
+            localPath = localPath + '/'            
 
         return rsync(localPath, serverPath)
 

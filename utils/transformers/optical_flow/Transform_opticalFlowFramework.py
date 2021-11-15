@@ -10,24 +10,9 @@ class Transform_opticalFlowFramework(Transform_opticalFlowBase):
 
     def getArgParser(self):
         parser = argparse.ArgumentParser(description='Base argument parser for optical flow')
-        parser.add_argument('--vis', type=str, default='normal', help='the visualization method (normal/average).')
         return parser
 
     def processImageCollection(self, model, args):
-        if args.vis == 'normal':
-            for flow, flow_name in self.computeOpticalFlowForImageCollection(model, args):
-                flow_img = self.visualize(flow)
-                yield flow_img, flow_name
-        elif args.vis == 'average':
-            flows = []
-            for flow, flow_name in self.computeOpticalFlowForImageCollection(model, args):
-                flows.append(flow)
-            floMean = self.averageFlows(flows)
-            yield self.visualize(floMean), 'mean_optical_flow'
-        else:
-            raise ValueError('invalid vis argument.')
-    
-    def computeOpticalFlowForImageCollection(self, model, args):
         self.initOpticalFlowAlgorithm(model, args)
 
         imgNum = model.length()
@@ -48,6 +33,3 @@ class Transform_opticalFlowFramework(Transform_opticalFlowBase):
     def computeOpticalFlow(self, img1, img1_name, img2, img2_name):
         return None, None
 
-    def visualize(self, flow):
-        img = self.flowToImage(flow)
-        return img

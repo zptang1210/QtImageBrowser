@@ -1,2 +1,3 @@
 #define bbox selectROI
-ourTracker --bbox [bbox] --vis=bboxfixed
+ourTracker --bbox [bbox] 
+bbox2RGB --mode=bboxfixed
