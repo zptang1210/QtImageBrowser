@@ -1,7 +1,8 @@
 {
     "server": "gypsum.cs.umass.edu",
     "username": "zhipengtang",
-    "auth_method": "password",
+    "auth_method": "key",
     "processor_path": "/home/zhipengtang/.imageBrowserProcessor/QtImageBrowser",
-    "template_path": "./configs/serverConfigs/gypsum_template.txt"
+    "template_path": "./configs/serverConfigs/gypsum_template.txt",
+    "key_file": "/Users/zhipengtang/.ssh/id_rsa"
 }

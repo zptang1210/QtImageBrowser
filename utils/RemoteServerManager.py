@@ -15,6 +15,7 @@ class RemoteServerManager:
                     config = json.load(fin)
                 
                 assert {"server", "username", "auth_method", "processor_path", "template_path"}.issubset(set(config.keys()))
+                assert (config['auth_method'] == 'key' and "key_file" in config.keys()) or (config['auth_method'] == 'password')
                 assert (config['processor_path'] is None and config['template_path'] is None) or (config['processor_path'] is not None and config['template_path'] is not None)
                 allowProcessing = False if config['processor_path'] is None else True
 

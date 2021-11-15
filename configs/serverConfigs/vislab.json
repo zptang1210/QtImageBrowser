@@ -3,5 +3,6 @@
     "username": "vislab",
     "auth_method": "password",
     "processor_path": "/home/vislab/.vislab/QtImageBrowser",
-    "template_path": "./configs/serverConfigs/gypsum_template.txt"
+    "template_path": "./configs/serverConfigs/gypsum_template.txt",
+    "key_file": ""
 }
