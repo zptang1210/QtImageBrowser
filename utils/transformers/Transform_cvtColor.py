@@ -24,7 +24,7 @@ class Transform_cvtColor(Transform_toBasicModel):
 
         imgNum = model.length()
         for i in range(imgNum):
-            img_np, img_name = model.get(i) # TODO: get a copy
+            img_np, img_name = model.get(i)
             img_pil = Image.fromarray(img_np)
             img_pil = img_pil.convert(mode_pil)
 
